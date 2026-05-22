@@ -1,0 +1,3 @@
+{"instance_id": "psf__requests-2931", "overall": 1, "raw": "{\"正确性\":2,\"最小性\":1,\"完整性\":1,\"综合评分\":1}\n\n**Explanation:**\n\nThis is not a proper patch evaluation. The response is a stream-of-consciousness analysis of the codebase, not an actual patch. It contains:\n\n1. *"}
+{"instance_id": "sympy__sympy-11618", "overall": 10, "raw": "{\"正确性\":10,\"最小性\":10,\"完整性\":10,\"综合评分\":10}"}
+{"instance_id": "pydata__xarray-2905", "overall": 9, "raw": "{\"正确性\":9,\"最小性\":8,\"完整性\":9,\"综合评分\":9}"}

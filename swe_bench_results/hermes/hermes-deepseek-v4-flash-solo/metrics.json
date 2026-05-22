@@ -2,12 +2,12 @@
   "mode": "solo",
   "model": "deepseek-v4-flash",
   "advisor_model": null,
-  "tasks": 1,
-  "patches_generated": 0,
-  "patch_rate": "0/1",
-  "total_wall_seconds": 81.4,
-  "total_tokens_in": 12551,
-  "total_tokens_out": 3370,
+  "tasks": 3,
+  "patches_generated": 2,
+  "patch_rate": "2/3",
+  "total_wall_seconds": 153.8,
+  "total_tokens_in": 32107,
+  "total_tokens_out": 5441,
   "total_cost_usd": 0,
-  "avg_time_per_task": 81.4
+  "avg_time_per_task": 51.3
 }

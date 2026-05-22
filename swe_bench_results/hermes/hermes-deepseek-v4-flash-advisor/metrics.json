@@ -1,0 +1,13 @@
+{
+  "mode": "advisor",
+  "model": "deepseek-v4-flash",
+  "advisor_model": "glm-5.1",
+  "tasks": 3,
+  "patches_generated": 3,
+  "patch_rate": "3/3",
+  "total_wall_seconds": 291.1,
+  "total_tokens_in": 38783,
+  "total_tokens_out": 5730,
+  "total_cost_usd": 0,
+  "avg_time_per_task": 97.0
+}

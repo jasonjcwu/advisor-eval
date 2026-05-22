@@ -1,0 +1,3 @@
+{"instance_id": "psf__requests-2931", "overall": 10, "raw": "{\"正确性\":10,\"最小性\":10,\"完整性\":10,\"综合评分\":10}"}
+{"instance_id": "sympy__sympy-11618", "overall": 9, "raw": "{\"正确性\":9,\"最小性\":8,\"完整性\":9,\"综合评分\":9}"}
+{"instance_id": "pydata__xarray-2905", "overall": 0, "raw": "no patch"}
