@@ -1,0 +1,10 @@
+{
+  "exec": "claude-haiku-4-5-20251001",
+  "adv": null,
+  "mode": "solo",
+  "total": 6,
+  "completed": 4,
+  "patches": 3,
+  "adv_calls": 0,
+  "tokens_in": 32879
+}

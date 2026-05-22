@@ -1,0 +1,6 @@
+{"instance_id": "psf__requests-2931", "综合评分": 0, "分析": "no patch"}
+{"instance_id": "sympy__sympy-11618", "pair": "glm-air", "mode": "advisor", "综合评分": 1, "正确性": 1, "最小性": 1, "分析": "The patch replaces zip with zip_longest and fillvalue=0 to correctly handle points with different dimensions."}
+{"instance_id": "pydata__xarray-2905", "综合评分": 0, "分析": "no patch"}
+{"instance_id": "scikit-learn__scikit-learn-25102", "pair": "glm-air", "mode": "advisor", "综合评分": 10, "正确性": 10, "最小性": 10, "分析": "The patch preserves dtypes for DataFrame output by using DataFrame.iloc for indexing when the input is a DataFrame, which is minimal and correct for selector transformers."}
+{"instance_id": "django__django-10554", "综合评分": 0, "分析": "no patch"}
+{"instance_id": "sphinx-doc__sphinx-11510", "综合评分": 0, "分析": "no patch"}

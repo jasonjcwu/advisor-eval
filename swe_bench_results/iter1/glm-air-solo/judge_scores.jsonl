@@ -1,0 +1,6 @@
+{"instance_id": "psf__requests-2931", "综合评分": 0, "分析": "no patch"}
+{"instance_id": "sympy__sympy-11618", "pair": "glm-air", "mode": "solo", "综合评分": 8, "正确性": 10, "最小性": 5, "分析": "The patch correctly fixes the distance calculation for points of different dimensions by padding missing coordinates with zeros, but it unnecessarily includes an unrelated import compatibility change in basic.py."}
+{"instance_id": "pydata__xarray-2905", "综合评分": 0, "分析": "no patch"}
+{"instance_id": "scikit-learn__scikit-learn-25102", "综合评分": 0, "分析": "no patch"}
+{"instance_id": "django__django-10554", "综合评分": 0, "分析": "no patch"}
+{"instance_id": "sphinx-doc__sphinx-11510", "综合评分": 0, "分析": "no patch"}
