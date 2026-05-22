@@ -1,0 +1,10 @@
+{
+  "config": "ds-flash-ds-pro-advisor",
+  "dataset": "princeton-nlp/SWE-bench_Verified",
+  "total_instances": 5,
+  "completed": 5,
+  "patches_generated": 5,
+  "tokens_in": 17803,
+  "tokens_out": 8688,
+  "total_latency_s": 73.2
+}

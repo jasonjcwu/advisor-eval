@@ -1,0 +1,22 @@
+{
+  "instance_id": "psf__requests-2931",
+  "model_name_or_path": "deepseek-v4-flash",
+  "model_patch": "diff --git a/requests/models.py b/requests/models.py\nindex 9c624d3c..157e2b54 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -80,7 +80,9 @@ class RequestEncodingMixin(object):\n         if parameters are supplied as a dict.\n         \"\"\"\n \n-        if isinstance(data, (str, bytes)):\n+        if isinstance(data, bytes):\n+            return data\n+        elif isinstance(data, str):\n             return to_native_string(data)\n         elif hasattr(data, 'read'):\n             return data\n",
+  "metrics": {
+    "executor_input_tokens": 285107,
+    "executor_output_tokens": 6573,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 13,
+      "file_read": 6,
+      "ask_advisor": 1,
+      "file_edit": 1
+    },
+    "num_turns": 20,
+    "total_seconds": 74.0,
+    "cost_usd": 0.0219,
+    "error": null
+  }
+}

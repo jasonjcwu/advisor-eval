@@ -1,0 +1,46 @@
+{
+  "configs": {
+    "ds-flash-ds-pro-advisor": {
+      "config": "ds-flash-ds-pro-advisor",
+      "dataset": "princeton-nlp/SWE-bench_Verified",
+      "total_instances": 5,
+      "completed": 5,
+      "patches_generated": 5,
+      "tokens_in": 17803,
+      "tokens_out": 8688,
+      "total_latency_s": 73.2
+    },
+    "ds-flash-solo": {
+      "config": "ds-flash-solo",
+      "dataset": "princeton-nlp/SWE-bench_Verified",
+      "total_instances": 5,
+      "completed": 5,
+      "patches_generated": 5,
+      "tokens_in": 8634,
+      "tokens_out": 5046,
+      "total_latency_s": 38.1
+    }
+  },
+  "rows": [
+    {
+      "config": "ds-flash-ds-pro-advisor",
+      "patches": "5/5",
+      "exec_tokens": "17803↓ 8688↑",
+      "advisor_tokens": "0",
+      "latency": "73.2s",
+      "cost": "$0.0000",
+      "avg_turns": "N/A",
+      "avg_advisor": "N/A"
+    },
+    {
+      "config": "ds-flash-solo",
+      "patches": "5/5",
+      "exec_tokens": "8634↓ 5046↑",
+      "advisor_tokens": "0",
+      "latency": "38.1s",
+      "cost": "$0.0000",
+      "avg_turns": "N/A",
+      "avg_advisor": "N/A"
+    }
+  ]
+}

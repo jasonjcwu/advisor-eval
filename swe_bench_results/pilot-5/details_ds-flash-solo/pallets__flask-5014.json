@@ -1,0 +1,20 @@
+{
+  "instance_id": "pallets__flask-5014",
+  "model_name_or_path": "deepseek-v4-flash",
+  "model_patch": "diff --git a/src/flask/blueprints.py b/src/flask/blueprints.py\nindex eb50585d..f3e54559 100644\n--- a/src/flask/blueprints.py\n+++ b/src/flask/blueprints.py\n@@ -193,6 +193,9 @@ class Blueprint(Scaffold):\n         if \".\" in name:\n             raise ValueError(\"'name' may not contain a dot '.' character.\")\n \n+        if not name:\n+            raise ValueError(\"'name' must not be an empty string.\")\n+\n         self.name = name\n         self.url_prefix = url_prefix\n         self.subdomain = subdomain\n@@ -296,6 +299,10 @@ class Blueprint(Scaffold):\n         \"\"\"\n         name_prefix = options.get(\"name_prefix\", \"\")\n         self_name = options.get(\"name\", self.name)\n+\n+        if not self_name:\n+            raise ValueError(\"'name' must not be an empty string.\")\n+\n         name = f\"{name_prefix}.{self_name}\".lstrip(\".\")\n \n         if name in app.blueprints:\n",
+  "metrics": {
+    "executor_input_tokens": 575688,
+    "executor_output_tokens": 5158,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 29,
+      "file_read": 7
+    },
+    "num_turns": 30,
+    "total_seconds": 69.0,
+    "cost_usd": 0.0418,
+    "error": "Max turns reached"
+  }
+}

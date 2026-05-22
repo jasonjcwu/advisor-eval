@@ -1,0 +1,17 @@
+{
+  "instance_id": "pydata__xarray-3993",
+  "model_name_or_path": "glm-4.5-air",
+  "model_patch": "diff --git a/xarray/core/dataarray.py b/xarray/core/dataarray.py\nindex 2fef3edb..510e6d48 100644\n--- a/xarray/core/dataarray.py\n+++ b/xarray/core/dataarray.py\n@@ -3481,17 +3481,17 @@ class DataArray(AbstractArray, DataWithCoords):\n         return self._from_temp_dataset(ds)\n \n     def integrate(\n-        self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None\n+        self, coord: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None\n     ) -> \"DataArray\":\n         \"\"\" integrate the array with the trapezoidal rule.\n \n         .. note::\n-            This feature is limited to simple cartesian geometry, i.e. dim\n+            This feature is limited to simple cartesian geometry, i.e. coord\n             must be one dimensional.\n \n         Parameters\n         ----------\n-        dim : hashable, or sequence of hashable\n+        coord : hashable, or sequence of hashable\n             Coordinate(s) used for the integration.\n         datetime_unit : {\"Y\", \"M\", \"W\", \"D\", \"h\", \"m\", \"s\", \"ms\", \"us\", \"ns\", \\\n                          \"ps\", \"fs\", \"as\"}, optional\n@@ -3528,7 +3528,7 @@ class DataArray(AbstractArray, DataWithCoords):\n         array([5.4, 6.6, 7.8])\n         Dimensions without coordinates: y\n         \"\"\"\n-        ds = self._to_temp_dataset().integrate(dim, datetime_unit)\n+        ds = self._to_temp_dataset().integrate(coord, datetime_unit)\n         return self._from_temp_dataset(ds)\n \n     def unify_chunks(self) -> \"DataArray\":\n",
+  "metrics": {
+    "executor_input_tokens": 0,
+    "executor_output_tokens": 0,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {},
+    "num_turns": 0,
+    "total_seconds": 2.0,
+    "cost_usd": 0.0,
+    "error": "Executor API error: Error code: 429 - {'error': {'code': '1308', 'message': '\u5df2\u8fbe\u5230 5 \u5c0f\u65f6\u7684\u4f7f\u7528\u4e0a\u9650\u3002\u60a8\u7684\u9650\u989d\u5c06\u5728 2026-05-21 20:02:37 \u91cd\u7f6e\u3002'}}"
+  }
+}

@@ -85,6 +85,15 @@ MODELS = {
         cost_per_million_input=0.50,
         cost_per_million_output=2.00,
     ),
+    "glm-4.5-air": ModelConfig(
+        name="glm-4.5-air",
+        base_url=_KEYS.get("glm", {}).get("base_url", "https://open.bigmodel.cn/api/coding/paas/v4"),
+        api_key=_KEYS.get("glm", {}).get("api_key", os.environ.get("GLMCODE_API_KEY", "")),
+        max_tokens=4096,
+        supports_tools=True,
+        cost_per_million_input=0.10,
+        cost_per_million_output=0.10,
+    ),
 }
 
 

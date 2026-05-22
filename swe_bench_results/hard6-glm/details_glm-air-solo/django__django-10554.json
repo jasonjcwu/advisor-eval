@@ -1,0 +1,20 @@
+{
+  "instance_id": "django__django-10554",
+  "model_name_or_path": "glm-4.5-air",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 123318,
+    "executor_output_tokens": 1763,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 10,
+      "file_read": 5
+    },
+    "num_turns": 15,
+    "total_seconds": 67.1,
+    "cost_usd": 0.0125,
+    "error": "Max turns reached"
+  }
+}

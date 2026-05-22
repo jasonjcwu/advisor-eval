@@ -1,0 +1,21 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-11310",
+  "model_name_or_path": "glm-4.5-air",
+  "model_patch": "diff --git a/sklearn/model_selection/_search.py b/sklearn/model_selection/_search.py\nindex 99d6096af7..1b6e583bd7 100644\n--- a/sklearn/model_selection/_search.py\n+++ b/sklearn/model_selection/_search.py\n@@ -17,6 +17,7 @@ from collections import Mapping, namedtuple, defaultdict, Sequence, Iterable\n from functools import partial, reduce\n from itertools import product\n import operator\n+import time\n import warnings\n \n import numpy as np\n@@ -424,6 +425,7 @@ class BaseSearchCV(six.with_metaclass(ABCMeta, BaseEstimator,\n         self.pre_dispatch = pre_dispatch\n         self.error_score = error_score\n         self.return_train_score = return_train_score\n+        self.refit_time_ = None\n \n     @property\n     def _estimator_type(self):\n@@ -767,9 +769,13 @@ class BaseSearchCV(six.with_metaclass(ABCMeta, BaseEstimator,\n             self.best_estimator_ = clone(base_estimator).set_params(\n                 **self.best_params_)\n             if y is not None:\n+                start_time = time.time()\n                 self.best_estimator_.fit(X, y, **fit_params)\n+                self.refit_time_ = time.time() - start_time\n             else:\n+                start_time = time.time()\n                 self.best_estimator_.fit(X, **fit_params)\n+                self.refit_time_ = time.time() - start_time\n \n         # Store the only scorer not as a dict for single metric evaluation\n         self.scorer_ = scorers if self.multimetric_ else scorers['score']\n",
+  "metrics": {
+    "executor_input_tokens": 146175,
+    "executor_output_tokens": 2317,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 10,
+      "file_read": 3,
+      "file_edit": 2
+    },
+    "num_turns": 15,
+    "total_seconds": 83.6,
+    "cost_usd": 0.0148,
+    "error": "Max turns reached"
+  }
+}

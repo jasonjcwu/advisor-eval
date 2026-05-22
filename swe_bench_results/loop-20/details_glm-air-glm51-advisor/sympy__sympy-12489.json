@@ -1,0 +1,20 @@
+{
+  "instance_id": "sympy__sympy-12489",
+  "model_name_or_path": "glm-4.5-air+glm-5.1",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 176498,
+    "executor_output_tokens": 2397,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 8,
+      "file_read": 7
+    },
+    "num_turns": 15,
+    "total_seconds": 78.9,
+    "cost_usd": 0.0179,
+    "error": "Max turns reached"
+  }
+}

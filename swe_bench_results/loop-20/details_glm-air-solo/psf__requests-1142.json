@@ -1,0 +1,21 @@
+{
+  "instance_id": "psf__requests-1142",
+  "model_name_or_path": "glm-4.5-air",
+  "model_patch": "diff --git a/requests/models.py b/requests/models.py\nindex 99260453..1e6d15a9 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -386,13 +386,14 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):\n         self.body = body\n \n     def prepare_content_length(self, body):\n-        self.headers['Content-Length'] = '0'\n-        if hasattr(body, 'seek') and hasattr(body, 'tell'):\n-            body.seek(0, 2)\n-            self.headers['Content-Length'] = str(body.tell())\n-            body.seek(0, 0)\n-        elif body is not None:\n-            self.headers['Content-Length'] = str(len(body))\n+        # Don't add Content-Length for GET requests unless there's actual body content\n+        if body is not None and self.method.upper() != 'GET':\n+            if hasattr(body, 'seek') and hasattr(body, 'tell'):\n+                body.seek(0, 2)\n+                self.headers['Content-Length'] = str(body.tell())\n+                body.seek(0, 0)\n+            else:\n+                self.headers['Content-Length'] = str(len(body))\n \n     def prepare_auth(self, auth):\n         \"\"\"Prepares the given HTTP auth data.\"\"\"\n",
+  "metrics": {
+    "executor_input_tokens": 90889,
+    "executor_output_tokens": 1690,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 5,
+      "file_read": 5,
+      "file_edit": 1
+    },
+    "num_turns": 11,
+    "total_seconds": 50.4,
+    "cost_usd": 0.0093,
+    "error": "Executor API error: Error code: 429 - {'error': {'code': '1308', 'message': '\u5df2\u8fbe\u5230 5 \u5c0f\u65f6\u7684\u4f7f\u7528\u4e0a\u9650\u3002\u60a8\u7684\u9650\u989d\u5c06\u5728 2026-05-21 20:02:37 \u91cd\u7f6e\u3002'}}"
+  }
+}

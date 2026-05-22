@@ -1,0 +1,20 @@
+{
+  "instance_id": "psf__requests-2931",
+  "model_name_or_path": "deepseek-v4-flash",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 89635,
+    "executor_output_tokens": 1017,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 8,
+      "file_read": 6
+    },
+    "num_turns": 10,
+    "total_seconds": 15.2,
+    "cost_usd": 0.0066,
+    "error": "Max turns reached"
+  }
+}

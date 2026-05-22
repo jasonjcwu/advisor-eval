@@ -1,0 +1,20 @@
+{
+  "instance_id": "django__django-10554",
+  "model_name_or_path": "deepseek-v4-flash+deepseek-chat",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 762119,
+    "executor_output_tokens": 6957,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 31,
+      "file_read": 8
+    },
+    "num_turns": 30,
+    "total_seconds": 83.8,
+    "cost_usd": 0.0554,
+    "error": "Max turns reached"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "track": "hermes",
+  "iteration": 1,
+  "executor": "deepseek-v4-flash",
+  "advisor": "deepseek-chat",
+  "mode": "advisor",
+  "total": 1,
+  "patches": 0,
+  "tokens_in": 4262,
+  "tokens_out": 396,
+  "advisor_calls": 0
+}

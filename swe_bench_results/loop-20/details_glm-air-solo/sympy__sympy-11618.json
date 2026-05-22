@@ -1,0 +1,17 @@
+{
+  "instance_id": "sympy__sympy-11618",
+  "model_name_or_path": "glm-4.5-air",
+  "model_patch": "diff --git a/sympy/geometry/point.py b/sympy/geometry/point.py\nindex 593048464b..78c672b83c 100644\n--- a/sympy/geometry/point.py\n+++ b/sympy/geometry/point.py\n@@ -266,8 +266,14 @@ def distance(self, p):\n         sqrt(x**2 + y**2)\n \n         \"\"\"\n-        return sqrt(sum([(a - b)**2 for a, b in zip(\n-            self.args, p.args if isinstance(p, Point) else p)]))\n+        p = Point(p)\n+        sargs = self.args\n+        pargs = p.args\n+        if len(sargs) != len(pargs):\n+            diff = max(len(sargs), len(pargs))\n+            sargs = tuple(sargs) + (S.Zero,)*(diff - len(sargs))\n+            pargs = tuple(pargs) + (S.Zero,)*(diff - len(pargs))\n+        return sqrt(sum((a - b)**2 for a, b in zip(sargs, pargs)))\n \n     def taxicab_distance(self, p):\n         \"\"\"The Taxicab Distance from self to point p.\n@@ -300,7 +306,13 @@ def taxicab_distance(self, p):\n \n         \"\"\"\n         p = Point(p)\n-        return sum(abs(a - b) for a, b in zip(self.args, p.args))\n+        sargs = self.args\n+        pargs = p.args\n+        if len(sargs) != len(pargs):\n+            diff = max(len(sargs), len(pargs))\n+            sargs = tuple(sargs) + (S.Zero,)*(diff - len(sargs))\n+            pargs = tuple(pargs) + (S.Zero,)*(diff - len(pargs))\n+        return sum(abs(a - b) for a, b in zip(sargs, pargs))\n \n     def midpoint(self, p):\n         \"\"\"The midpoint between self and point p.\n@@ -329,7 +341,13 @@ def midpoint(self, p):\n         Point2D(7, 3)\n \n         \"\"\"\n-        return Point([simplify((a + b)*S.Half) for a, b in zip(self.args, p.args)])\n+        sargs = self.args\n+        pargs = p.args\n+        if len(sargs) != len(pargs):\n+            diff = max(len(sargs), len(pargs))\n+            sargs = tuple(sargs) + (S.Zero,)*(diff - len(sargs))\n+            pargs = tuple(pargs) + (S.Zero,)*(diff - len(pargs))\n+        return Point([simplify((a + b)*S.Half) for a, b in zip(sargs, pargs)])\n \n     def evalf(self, prec=None, **options):\n         \"\"\"Evaluate the coordinates of the point.\n",
+  "metrics": {
+    "executor_input_tokens": 0,
+    "executor_output_tokens": 0,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {},
+    "num_turns": 0,
+    "total_seconds": 2.1,
+    "cost_usd": 0.0,
+    "error": "Executor API error: Error code: 429 - {'error': {'code': '1308', 'message': '\u5df2\u8fbe\u5230 5 \u5c0f\u65f6\u7684\u4f7f\u7528\u4e0a\u9650\u3002\u60a8\u7684\u9650\u989d\u5c06\u5728 2026-05-21 20:02:37 \u91cd\u7f6e\u3002'}}"
+  }
+}

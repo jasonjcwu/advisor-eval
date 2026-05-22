@@ -1,0 +1,10 @@
+{
+  "exec": "gpt-5.4-mini",
+  "adv": "gpt-5.5",
+  "mode": "advisor",
+  "total": 1,
+  "completed": 1,
+  "patches": 0,
+  "adv_calls": 0,
+  "tokens_in": 356
+}

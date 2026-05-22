@@ -1,0 +1,22 @@
+{
+  "instance_id": "sympy__sympy-11618",
+  "model_name_or_path": "glm-4.5-air+glm-5.1",
+  "model_patch": "diff --git a/sympy/core/basic.py b/sympy/core/basic.py\nindex 627630fea7..a7914ad9b6 100644\n--- a/sympy/core/basic.py\n+++ b/sympy/core/basic.py\n@@ -1,6 +1,9 @@\n \"\"\"Base class for all the objects in SymPy\"\"\"\n from __future__ import print_function, division\n-from collections import Mapping\n+try:\n+    from collections import Mapping\n+except ImportError:\n+    from collections.abc import Mapping\n \n from .assumptions import BasicMeta, ManagedProperties\n from .cache import cacheit\ndiff --git a/sympy/geometry/point.py b/sympy/geometry/point.py\nindex 593048464b..78c672b83c 100644\n--- a/sympy/geometry/point.py\n+++ b/sympy/geometry/point.py\n@@ -266,8 +266,14 @@ def distance(self, p):\n         sqrt(x**2 + y**2)\n \n         \"\"\"\n-        return sqrt(sum([(a - b)**2 for a, b in zip(\n-            self.args, p.args if isinstance(p, Point) else p)]))\n+        p = Point(p)\n+        sargs = self.args\n+        pargs = p.args\n+        if len(sargs) != len(pargs):\n+            diff = max(len(sargs), len(pargs))\n+            sargs = tuple(sargs) + (S.Zero,)*(diff - len(sargs))\n+            pargs = tuple(pargs) + (S.Zero,)*(diff - len(pargs))\n+        return sqrt(sum((a - b)**2 for a, b in zip(sargs, pargs)))\n \n     def taxicab_distance(self, p):\n         \"\"\"The Taxicab Distance from self to point p.\n@@ -300,7 +306,13 @@ def taxicab_distance(self, p):\n \n         \"\"\"\n         p = Point(p)\n-        return sum(abs(a - b) for a, b in zip(self.args, p.args))\n+        sargs = self.args\n+        pargs = p.args\n+        if len(sargs) != len(pargs):\n+            diff = max(len(sargs), len(pargs))\n+            sargs = tuple(sargs) + (S.Zero,)*(diff - len(sargs))\n+            pargs = tuple(pargs) + (S.Zero,)*(diff - len(pargs))\n+        return sum(abs(a - b) for a, b in zip(sargs, pargs))\n \n     def midpoint(self, p):\n         \"\"\"The midpoint between self and point p.\n@@ -329,7 +341,13 @@ def midpoint(self, p):\n         Point2D(7, 3)\n \n         \"\"\"\n-        return Point([simplify((a + b)*S.Half) for a, b in zip(self.args, p.args)])\n+        sargs = self.args\n+        pargs = p.args\n+        if len(sargs) != len(pargs):\n+            diff = max(len(sargs), len(pargs))\n+            sargs = tuple(sargs) + (S.Zero,)*(diff - len(sargs))\n+            pargs = tuple(pargs) + (S.Zero,)*(diff - len(pargs))\n+        return Point([simplify((a + b)*S.Half) for a, b in zip(sargs, pargs)])\n \n     def evalf(self, prec=None, **options):\n         \"\"\"Evaluate the coordinates of the point.\n",
+  "metrics": {
+    "executor_input_tokens": 131722,
+    "executor_output_tokens": 2755,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 9,
+      "file_read": 4,
+      "file_write": 1,
+      "file_edit": 1
+    },
+    "num_turns": 15,
+    "total_seconds": 77.8,
+    "cost_usd": 0.0134,
+    "error": "Max turns reached"
+  }
+}

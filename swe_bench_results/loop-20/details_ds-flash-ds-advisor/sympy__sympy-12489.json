@@ -1,0 +1,20 @@
+{
+  "instance_id": "sympy__sympy-12489",
+  "model_name_or_path": "deepseek-v4-flash+deepseek-chat",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 199824,
+    "executor_output_tokens": 1426,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 10,
+      "file_read": 5
+    },
+    "num_turns": 15,
+    "total_seconds": 20.7,
+    "cost_usd": 0.0144,
+    "error": "Max turns reached"
+  }
+}

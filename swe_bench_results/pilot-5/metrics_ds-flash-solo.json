@@ -1,0 +1,17 @@
+{
+  "config": "ds-flash-solo",
+  "executor_model": "deepseek-v4-flash",
+  "advisor_model": null,
+  "total_instances": 5,
+  "completed": 5,
+  "patches_generated": 4,
+  "executor_tokens_in": 2775100,
+  "executor_tokens_out": 44412,
+  "advisor_tokens_total": 0,
+  "total_latency_s": 597.7,
+  "total_cost_usd": 0.2076,
+  "total_advisor_calls": 0,
+  "total_turns": 150,
+  "avg_turns": 30.0,
+  "avg_advisor_calls": 0.0
+}

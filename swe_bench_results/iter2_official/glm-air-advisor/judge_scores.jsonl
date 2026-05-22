@@ -1,0 +1,6 @@
+{"instance_id": "psf__requests-2931", "overall": 0, "analysis": "no patch"}
+{"correctness": 10, "minimality": 5, "overall": 7, "analysis": "The patch correctly fixes the distance calculation by using zip_longest with fillvalue=0 to handle different dimensions, but includes unrelated changes in basic.py and plot.py, reducing minimality.", "instance_id": "sympy__sympy-11618"}
+{"instance_id": "pydata__xarray-2905", "overall": 0, "analysis": "no patch"}
+{"correctness": 9, "minimality": 10, "overall": 9, "analysis": "The patch correctly uses pandas iloc to preserve dtypes for DataFrame inputs, with a minor robustness concern due to duck-typing check instead of explicit isinstance.", "instance_id": "scikit-learn__scikit-learn-25102"}
+{"instance_id": "django__django-10554", "overall": 0, "analysis": "no patch"}
+{"correctness": 2, "minimality": 3, "overall": 2, "analysis": "Patch adds a monkey-patch function but never calls it, so it does not fix the issue.", "instance_id": "sphinx-doc__sphinx-11510"}

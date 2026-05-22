@@ -1,0 +1,20 @@
+{
+  "instance_id": "mwaskom__seaborn-3069",
+  "model_name_or_path": "glm-4.5-air+glm-5.1",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 113184,
+    "executor_output_tokens": 2652,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 12,
+      "file_read": 3
+    },
+    "num_turns": 15,
+    "total_seconds": 103.3,
+    "cost_usd": 0.0116,
+    "error": "Max turns reached"
+  }
+}

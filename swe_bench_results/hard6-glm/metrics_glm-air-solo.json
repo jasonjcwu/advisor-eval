@@ -1,0 +1,17 @@
+{
+  "config": "glm-air-solo",
+  "executor_model": "glm-4.5-air",
+  "advisor_model": null,
+  "total_instances": 6,
+  "completed": 6,
+  "patches_generated": 5,
+  "executor_tokens_in": 900506,
+  "executor_tokens_out": 21488,
+  "advisor_tokens_total": 0,
+  "total_latency_s": 885.0,
+  "total_cost_usd": 0.0923,
+  "total_advisor_calls": 0,
+  "total_turns": 90,
+  "avg_turns": 15.0,
+  "avg_advisor_calls": 0.0
+}

@@ -1,0 +1,20 @@
+{
+  "instance_id": "pytest-dev__pytest-10051",
+  "model_name_or_path": "glm-4.5-air+glm-5.1",
+  "model_patch": "diff --git a/src/_pytest/logging.py b/src/_pytest/logging.py\nindex a4f4214b1..b60465cb4 100644\n--- a/src/_pytest/logging.py\n+++ b/src/_pytest/logging.py\n@@ -342,7 +342,7 @@ class LogCaptureHandler(logging_StreamHandler):\n         super().emit(record)\n \n     def reset(self) -> None:\n-        self.records = []\n+        self.records.clear()\n         self.stream = StringIO()\n \n     def handleError(self, record: logging.LogRecord) -> None:\n",
+  "metrics": {
+    "executor_input_tokens": 102013,
+    "executor_output_tokens": 2183,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 13,
+      "file_read": 2
+    },
+    "num_turns": 15,
+    "total_seconds": 69.4,
+    "cost_usd": 0.0104,
+    "error": "Max turns reached"
+  }
+}

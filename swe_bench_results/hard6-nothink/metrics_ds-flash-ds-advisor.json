@@ -1,0 +1,17 @@
+{
+  "config": "ds-flash-ds-advisor",
+  "executor_model": "deepseek-v4-flash",
+  "advisor_model": "deepseek-chat",
+  "total_instances": 6,
+  "completed": 6,
+  "patches_generated": 5,
+  "executor_tokens_in": 3015532,
+  "executor_tokens_out": 29382,
+  "advisor_tokens_total": 69122,
+  "total_latency_s": 422.3,
+  "total_cost_usd": 0.239,
+  "total_advisor_calls": 4,
+  "total_turns": 180,
+  "avg_turns": 30.0,
+  "avg_advisor_calls": 0.7
+}

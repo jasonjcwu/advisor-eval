@@ -1,0 +1,20 @@
+{
+  "instance_id": "pydata__xarray-4075",
+  "model_name_or_path": "deepseek-v4-flash",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 444523,
+    "executor_output_tokens": 10477,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 27,
+      "file_read": 4
+    },
+    "num_turns": 30,
+    "total_seconds": 163.5,
+    "cost_usd": 0.0343,
+    "error": "Max turns reached"
+  }
+}

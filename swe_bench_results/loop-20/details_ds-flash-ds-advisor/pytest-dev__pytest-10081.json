@@ -1,0 +1,20 @@
+{
+  "instance_id": "pytest-dev__pytest-10081",
+  "model_name_or_path": "deepseek-v4-flash+deepseek-chat",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 154763,
+    "executor_output_tokens": 2554,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 12,
+      "file_read": 3
+    },
+    "num_turns": 15,
+    "total_seconds": 29.0,
+    "cost_usd": 0.0116,
+    "error": "Max turns reached"
+  }
+}

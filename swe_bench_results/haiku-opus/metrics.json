@@ -1,0 +1,10 @@
+{
+  "executor": "claude-haiku-4-5-20251001",
+  "advisor": "claude-opus-4-7",
+  "total": 1,
+  "completed": 1,
+  "patches": 0,
+  "total_advisor_calls": 0,
+  "total_tokens_in": 7521,
+  "total_tokens_out": 376
+}

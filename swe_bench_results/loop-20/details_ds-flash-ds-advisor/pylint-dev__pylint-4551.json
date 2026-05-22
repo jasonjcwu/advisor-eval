@@ -1,0 +1,20 @@
+{
+  "instance_id": "pylint-dev__pylint-4551",
+  "model_name_or_path": "deepseek-v4-flash+deepseek-chat",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 161616,
+    "executor_output_tokens": 2077,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 15,
+      "file_read": 4
+    },
+    "num_turns": 15,
+    "total_seconds": 53.7,
+    "cost_usd": 0.0119,
+    "error": "Max turns reached"
+  }
+}

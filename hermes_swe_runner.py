@@ -101,28 +101,26 @@ def run_hermes_task(inst, mode, model, provider, advisor_model, advisor_provider
             except Exception as e:
                 print(f"      ⚠️  git setup failed: {e}")
     
-    # Build hermes command
+    # Build hermes command — use 'chat -q' for single-shot mode
+    # Limit toolsets for speed: terminal + file + advisor (or just terminal+file for solo)
+    if mode == "solo":
+        toolsets = "terminal,file"
+    else:
+        toolsets = "advisor,terminal,file"
     cmd = [
         "hermes", "chat", "-q", prompt, "-Q",
-        "-m", model,
+        "--provider", provider or "deepseek",
         "--max-turns", str(max_turns),
+        "-t", toolsets,
     ]
-    if provider:
-        cmd.extend(["--provider", provider])
     
     # For advisor mode, configure advisor model via env var
     env = os.environ.copy()
     if mode == "advisor" and advisor_model:
         env["HERMES_ADVISOR_MODEL"] = advisor_model
         env["HERMES_ADVISOR_PROVIDER"] = advisor_provider or ""
-        # Enable advisor tool explicitly
-        cmd.extend(["-t", "advisor,terminal,file"])
     
-    # Solo mode: disable advisor
-    if mode == "solo":
-        cmd.extend(["-t", "terminal,file"])
-    
-    print(f"      Running: {' '.join(cmd[:8])}... (workdir={repo_dir})")
+    print(f"      Running: hermes chat -q [prompt] -Q --provider {provider or 'deepseek'} --max-turns {max_turns} -t {toolsets}")
     
     start = time.time()
     try:
@@ -145,29 +143,23 @@ def run_hermes_task(inst, mode, model, provider, advisor_model, advisor_provider
         # Extract patch from response
         patch = extract_patch(stdout)
         
-        # Try to get session data for token/cost info
-        tokens_in = tokens_out = cost = 0
+        # Try to get session data from Hermes state.db
+        tokens_in = tokens_out = cost = tool_calls = 0
         if session_id:
             try:
-                export = subprocess.run(
-                    ["hermes", "sessions", "export", session_id],
-                    capture_output=True, text=True, timeout=15,
-                    cwd="/tmp"
+                import sqlite3
+                db = sqlite3.connect(os.path.expanduser("~/.hermes/state.db"))
+                cur = db.cursor()
+                cur.execute(
+                    "SELECT input_tokens, output_tokens, estimated_cost_usd, tool_call_count FROM sessions WHERE id=?",
+                    (session_id,)
                 )
-                # Parse exported sessions (JSONL)
-                export_file = os.path.join("/tmp", session_id)
-                if os.path.exists(export_file):
-                    with open(export_file) as f:
-                        for line in f:
-                            d = json.loads(line)
-                            if d.get("id") == session_id:
-                                tokens_in = d.get("input_tokens", 0)
-                                tokens_out = d.get("output_tokens", 0)
-                                cost = d.get("estimated_cost_usd", 0)
-                                break
-                    os.remove(export_file)
+                row = cur.fetchone()
+                if row:
+                    tokens_in, tokens_out, cost, tool_calls = row[0] or 0, row[1] or 0, row[2] or 0, row[3] or 0
+                db.close()
             except Exception as e:
-                print(f"      ⚠️  session export failed: {e}")
+                print(f"      ⚠️  DB query failed: {e}")
         
         return {
             "instance_id": iid,
@@ -181,6 +173,7 @@ def run_hermes_task(inst, mode, model, provider, advisor_model, advisor_provider
             "tokens_out": tokens_out,
             "estimated_cost_usd": cost,
             "has_patch": bool(patch and len(patch.strip()) > 10),
+            "tool_calls": tool_calls,
             "response_preview": stdout[-500:] if stdout else "",
         }
         

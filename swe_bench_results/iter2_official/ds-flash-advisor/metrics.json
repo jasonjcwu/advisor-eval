@@ -1,0 +1,10 @@
+{
+  "exec": "deepseek-v4-flash",
+  "adv": "deepseek-chat",
+  "mode": "advisor",
+  "total": 6,
+  "completed": 6,
+  "patches": 3,
+  "adv_calls": 3,
+  "tokens_in": 1416116
+}

@@ -1,0 +1,9 @@
+{
+  "executor": "claude-sonnet-4-6",
+  "advisor": null,
+  "total": 6,
+  "completed": 6,
+  "patches": 3,
+  "adv_calls": 0,
+  "tokens_in": 47808
+}

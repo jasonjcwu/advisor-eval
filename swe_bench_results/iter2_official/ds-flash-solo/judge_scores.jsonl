@@ -1,0 +1,7 @@
+{"instance_id": "psf__requests-2931", "overall": 0, "analysis": "no patch"}
+{"correctness": 10, "minimality": 10, "overall": 10, "analysis": "Correctly handles bytes by returning them directly, preventing the erroneous call to to_native_string while maintaining existing behavior for strings and file-like objects.", "instance_id": "psf__requests-2931"}
+{"raw": "", "overall": 0, "instance_id": "sympy__sympy-11618"}
+{"correctness": 10, "minimality": 10, "overall": 10, "analysis": "The patch fixes the bug by only extracting .values from pandas Series/DataFrame, preventing accidental coercion of objects with a values attribute.", "instance_id": "pydata__xarray-2905"}
+{"instance_id": "scikit-learn__scikit-learn-25102", "overall": 0, "analysis": "no patch"}
+{"instance_id": "django__django-10554", "overall": 0, "analysis": "no patch"}
+{"instance_id": "sphinx-doc__sphinx-11510", "overall": 0, "analysis": "no patch"}

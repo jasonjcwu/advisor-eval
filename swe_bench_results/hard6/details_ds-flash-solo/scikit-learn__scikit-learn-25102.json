@@ -1,0 +1,21 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-25102",
+  "model_name_or_path": "deepseek-v4-flash",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 551288,
+    "executor_output_tokens": 7595,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 28,
+      "file_read": 4,
+      "ask_advisor": 1
+    },
+    "num_turns": 30,
+    "total_seconds": 283.2,
+    "cost_usd": 0.0409,
+    "error": "Max turns reached"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "instance_id": "django__django-10554",
+  "model_name_or_path": "glm-4.5-air",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 0,
+    "executor_output_tokens": 0,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {},
+    "num_turns": 0,
+    "total_seconds": 2.0,
+    "cost_usd": 0.0,
+    "error": "Executor API error: Error code: 429 - {'error': {'code': '1308', 'message': '\u5df2\u8fbe\u5230 5 \u5c0f\u65f6\u7684\u4f7f\u7528\u4e0a\u9650\u3002\u60a8\u7684\u9650\u989d\u5c06\u5728 2026-05-21 20:02:37 \u91cd\u7f6e\u3002'}}"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "instance_id": "pallets__flask-5014",
+  "model_name_or_path": "glm-4.5-air+glm-5.1",
+  "model_patch": "diff --git a/src/flask/blueprints.py b/src/flask/blueprints.py\nindex eb50585d..54be320b 100644\n--- a/src/flask/blueprints.py\n+++ b/src/flask/blueprints.py\n@@ -190,6 +190,8 @@ class Blueprint(Scaffold):\n             root_path=root_path,\n         )\n \n+        if not name:\n+            raise ValueError(\"'name' may not be empty.\")\n         if \".\" in name:\n             raise ValueError(\"'name' may not contain a dot '.' character.\")\n \ndiff --git a/tests/test_blueprints.py b/tests/test_blueprints.py\nindex d46b769b..d10d951e 100644\n--- a/tests/test_blueprints.py\n+++ b/tests/test_blueprints.py\n@@ -256,6 +256,11 @@ def test_dotted_name_not_allowed(app, client):\n         flask.Blueprint(\"app.ui\", __name__)\n \n \n+def test_empty_name_not_allowed(app, client):\n+    with pytest.raises(ValueError, match=\"'name' may not be empty.\"):\n+        flask.Blueprint(\"\", __name__)\n+\n+\n def test_dotted_names_from_app(app, client):\n     test = flask.Blueprint(\"test\", __name__)\n \n",
+  "metrics": {
+    "executor_input_tokens": 118875,
+    "executor_output_tokens": 1783,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 11,
+      "file_read": 4
+    },
+    "num_turns": 15,
+    "total_seconds": 82.3,
+    "cost_usd": 0.0121,
+    "error": "Max turns reached"
+  }
+}

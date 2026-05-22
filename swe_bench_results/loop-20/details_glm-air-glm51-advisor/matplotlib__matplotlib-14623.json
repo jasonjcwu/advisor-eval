@@ -1,0 +1,21 @@
+{
+  "instance_id": "matplotlib__matplotlib-14623",
+  "model_name_or_path": "glm-4.5-air+glm-5.1",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 137425,
+    "executor_output_tokens": 2609,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 10,
+      "file_read": 4,
+      "file_write": 1
+    },
+    "num_turns": 15,
+    "total_seconds": 74.9,
+    "cost_usd": 0.014,
+    "error": "Max turns reached"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "instance_id": "psf__requests-1142",
+  "model_name_or_path": "glm-4.5-air+glm-5.1",
+  "model_patch": "diff --git a/requests/models.py b/requests/models.py\nindex 99260453..0c8bced6 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -358,7 +358,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):\n             if files:\n                 raise NotImplementedError('Streamed bodies and files are mutually exclusive.')\n \n-            if length:\n+            if length and self.method.upper() != 'GET':\n                 self.headers['Content-Length'] = length\n             else:\n                 self.headers['Transfer-Encoding'] = 'chunked'\n@@ -386,13 +386,14 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):\n         self.body = body\n \n     def prepare_content_length(self, body):\n-        self.headers['Content-Length'] = '0'\n-        if hasattr(body, 'seek') and hasattr(body, 'tell'):\n-            body.seek(0, 2)\n-            self.headers['Content-Length'] = str(body.tell())\n-            body.seek(0, 0)\n-        elif body is not None:\n-            self.headers['Content-Length'] = str(len(body))\n+        # Don't add Content-Length for GET requests unless there's actual body content\n+        if body is not None and self.method.upper() != 'GET':\n+            if hasattr(body, 'seek') and hasattr(body, 'tell'):\n+                body.seek(0, 2)\n+                self.headers['Content-Length'] = str(body.tell())\n+                body.seek(0, 0)\n+            else:\n+                self.headers['Content-Length'] = str(len(body))\n \n     def prepare_auth(self, auth):\n         \"\"\"Prepares the given HTTP auth data.\"\"\"\n",
+  "metrics": {
+    "executor_input_tokens": 151762,
+    "executor_output_tokens": 4004,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 7,
+      "file_read": 4,
+      "file_edit": 3,
+      "file_write": 1
+    },
+    "num_turns": 15,
+    "total_seconds": 115.0,
+    "cost_usd": 0.0156,
+    "error": "Max turns reached"
+  }
+}

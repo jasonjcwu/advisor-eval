@@ -1,0 +1,21 @@
+{
+  "instance_id": "pylint-dev__pylint-4970",
+  "model_name_or_path": "deepseek-v4-flash",
+  "model_patch": "diff --git a/pylint/checkers/similar.py b/pylint/checkers/similar.py\nindex c65b1c893..62cd004ba 100644\n--- a/pylint/checkers/similar.py\n+++ b/pylint/checkers/similar.py\n@@ -471,6 +471,8 @@ class Similar:\n         Last regroups all successive couples in a bigger one. It allows to take into account common chunk of lines that have more\n         than the minimal number of successive lines required.\n         \"\"\"\n+        if self.min_lines <= 0:\n+            return\n         hash_to_index_1: HashToIndex_T\n         hash_to_index_2: HashToIndex_T\n         index_to_lines_1: IndexToLines_T\n",
+  "metrics": {
+    "executor_input_tokens": 652692,
+    "executor_output_tokens": 11560,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 33,
+      "file_read": 6,
+      "file_edit": 3
+    },
+    "num_turns": 30,
+    "total_seconds": 132.6,
+    "cost_usd": 0.0492,
+    "error": "Max turns reached"
+  }
+}

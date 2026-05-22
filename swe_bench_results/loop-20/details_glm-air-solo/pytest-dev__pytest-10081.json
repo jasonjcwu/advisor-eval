@@ -1,0 +1,23 @@
+{
+  "instance_id": "pytest-dev__pytest-10081",
+  "model_name_or_path": "glm-4.5-air",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 141596,
+    "executor_output_tokens": 1930,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 7,
+      "ls -la src/</arg_value>": 1,
+      "file_read": 5,
+      "file_write": 1,
+      "file_edit": 1
+    },
+    "num_turns": 15,
+    "total_seconds": 123.3,
+    "cost_usd": 0.0144,
+    "error": "Max turns reached"
+  }
+}

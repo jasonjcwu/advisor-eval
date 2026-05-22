@@ -1,0 +1,21 @@
+{
+  "instance_id": "pydata__xarray-4075",
+  "model_name_or_path": "deepseek-v4-flash+deepseek-chat",
+  "model_patch": "diff --git a/xarray/core/weighted.py b/xarray/core/weighted.py\nindex 996d2e4c..7e7df9c7 100644\n--- a/xarray/core/weighted.py\n+++ b/xarray/core/weighted.py\n@@ -142,7 +142,9 @@ class Weighted:\n         # we need to mask data values that are nan; else the weights are wrong\n         mask = da.notnull()\n \n-        sum_of_weights = self._reduce(mask, self.weights, dim=dim, skipna=False)\n+        # Convert mask to float to avoid boolean dot product issues\n+        # (e.g. dot(True, True) = True instead of 1)\n+        sum_of_weights = self._reduce(mask.astype(float), self.weights, dim=dim, skipna=False)\n \n         # 0-weights are not valid\n         valid_weights = sum_of_weights != 0.0\n",
+  "metrics": {
+    "executor_input_tokens": 138107,
+    "executor_output_tokens": 3954,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 12,
+      "file_read": 2,
+      "file_edit": 1
+    },
+    "num_turns": 16,
+    "total_seconds": 60.9,
+    "cost_usd": 0.0109,
+    "error": null
+  }
+}

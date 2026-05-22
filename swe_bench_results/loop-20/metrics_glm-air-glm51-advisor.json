@@ -1,0 +1,17 @@
+{
+  "config": "glm-air-glm51-advisor",
+  "executor_model": "glm-4.5-air",
+  "advisor_model": "glm-5.1",
+  "total_instances": 20,
+  "completed": 20,
+  "patches_generated": 12,
+  "executor_tokens_in": 2658623,
+  "executor_tokens_out": 46072,
+  "advisor_tokens_total": 0,
+  "total_latency_s": 1541.3,
+  "total_cost_usd": 0.2706,
+  "total_advisor_calls": 0,
+  "total_turns": 300,
+  "avg_turns": 15.0,
+  "avg_advisor_calls": 0.0
+}

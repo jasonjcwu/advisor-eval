@@ -1,0 +1,10 @@
+{
+  "exec": "glm-4.5-air",
+  "adv": "glm-5.1",
+  "mode": "advisor",
+  "total": 6,
+  "completed": 6,
+  "patches": 3,
+  "adv_calls": 6,
+  "tokens_in": 837620
+}

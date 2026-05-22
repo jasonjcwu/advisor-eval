@@ -1,0 +1,21 @@
+{
+  "instance_id": "sphinx-doc__sphinx-10323",
+  "model_name_or_path": "glm-4.5-air",
+  "model_patch": "diff --git a/sphinx/directives/code.py b/sphinx/directives/code.py\nindex e8f9d6d..a9ec1f1 100644\n--- a/sphinx/directives/code.py\n+++ b/sphinx/directives/code.py\n@@ -248,9 +248,9 @@ def read(self, location: tuple[str, int] | None = None) -> tuple[str, int]:\n                 self.start_filter,\n                 self.end_filter,\n                 self.lines_filter,\n-                self.dedent_filter,\n                 self.prepend_filter,\n                 self.append_filter,\n+                self.dedent_filter,\n             ]\n             lines = self.read_file(self.filename, location=location)\n             for func in filters:\n",
+  "metrics": {
+    "executor_input_tokens": 125993,
+    "executor_output_tokens": 2358,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 9,
+      "file_read": 5,
+      "file_edit": 1
+    },
+    "num_turns": 15,
+    "total_seconds": 80.4,
+    "cost_usd": 0.0128,
+    "error": "Max turns reached"
+  }
+}

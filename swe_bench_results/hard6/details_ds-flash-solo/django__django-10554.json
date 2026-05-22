@@ -1,0 +1,20 @@
+{
+  "instance_id": "django__django-10554",
+  "model_name_or_path": "deepseek-v4-flash",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 685981,
+    "executor_output_tokens": 7426,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 35,
+      "file_read": 6
+    },
+    "num_turns": 30,
+    "total_seconds": 88.0,
+    "cost_usd": 0.0502,
+    "error": "Max turns reached"
+  }
+}

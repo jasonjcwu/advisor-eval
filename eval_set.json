@@ -1,0 +1,107 @@
+[
+  {
+    "id": "p1",
+    "name": "二分查找变体",
+    "difficulty": "easy",
+    "prompt": "实现一个函数 find_first_greater(arr, target)，在已排序数组中找到第一个大于 target 的元素索引，找不到返回 -1。",
+    "test_code": "\nassert find_first_greater([1,3,5,7,9], 4) == 2\nassert find_first_greater([1,3,5,7,9], 5) == 3\nassert find_first_greater([1,3,5,7,9], 9) == -1\nassert find_first_greater([1,3,5,7,9], 0) == 0\nassert find_first_greater([], 5) == -1\nassert find_first_greater([5], 5) == -1\nassert find_first_greater([5], 3) == 0\n"
+  },
+  {
+    "id": "p2",
+    "name": "合并区间",
+    "difficulty": "medium",
+    "prompt": "实现 merge_intervals(intervals)，输入 [[1,3],[2,6],[8,10],[15,18]]，返回 [[1,6],[8,10],[15,18]]。区间已按 start 排序。",
+    "test_code": "\nassert merge_intervals([[1,3],[2,6],[8,10],[15,18]]) == [[1,6],[8,10],[15,18]]\nassert merge_intervals([[1,4],[4,5]]) == [[1,5]]\nassert merge_intervals([]) == []\nassert merge_intervals([[1,4]]) == [[1,4]]\nassert merge_intervals([[0,4],[1,4]]) == [[0,4]]  # sorted by start\nassert merge_intervals([[1,3],[2,4],[5,7]]) == [[1,4],[5,7]]\n"
+  },
+  {
+    "id": "p3",
+    "name": "LRU缓存",
+    "difficulty": "medium",
+    "prompt": "实现 LRUCache 类：__init__(capacity), get(key) -> int (-1 if not found), put(key, value)。get 和 put 都是 O(1)。",
+    "test_code": "\ncache = LRUCache(2)\ncache.put(1, 1)\ncache.put(2, 2)\nassert cache.get(1) == 1\ncache.put(3, 3)  # evicts key 2\nassert cache.get(2) == -1\ncache.put(4, 4)  # evicts key 1\nassert cache.get(1) == -1\nassert cache.get(3) == 3\nassert cache.get(4) == 4\n"
+  },
+  {
+    "id": "p4",
+    "name": "有效的括号",
+    "difficulty": "easy",
+    "prompt": "实现 is_valid_parentheses(s)，判断字符串中的括号是否正确匹配。包含 () [] {}。",
+    "test_code": "\nassert is_valid_parentheses(\"()\") == True\nassert is_valid_parentheses(\"()[]{}\") == True\nassert is_valid_parentheses(\"(]\") == False\nassert is_valid_parentheses(\"([)]\") == False\nassert is_valid_parentheses(\"{[]}\") == True\nassert is_valid_parentheses(\"\") == True\nassert is_valid_parentheses(\"(\") == False\nassert is_valid_parentheses(\")\") == False\n"
+  },
+  {
+    "id": "p5",
+    "name": "字符串压缩",
+    "difficulty": "easy",
+    "prompt": "实现 compress_string(s)，将连续重复字符压缩。例如 'aabcccccaaa' -> 'a2b1c5a3'。如果压缩后更长则返回原字符串。",
+    "test_code": "\nassert compress_string(\"aabcccccaaa\") == \"a2b1c5a3\"\nassert compress_string(\"abc\") == \"abc\"\nassert compress_string(\"aabbcc\") == \"aabbcc\"  # compressed same length\nassert compress_string(\"\") == \"\"\nassert compress_string(\"aaaaa\") == \"a5\"\nassert compress_string(\"aa\") == \"aa\"  # a2 same as aa\n"
+  },
+  {
+    "id": "p6",
+    "name": "矩阵旋转",
+    "difficulty": "medium",
+    "prompt": "实现 rotate_matrix(matrix)，将 n×n 矩阵顺时针旋转 90 度，原地修改。",
+    "test_code": "\nm1 = [[1,2],[3,4]]\nrotate_matrix(m1)\nassert m1 == [[3,1],[4,2]]\nm2 = [[1,2,3],[4,5,6],[7,8,9]]\nrotate_matrix(m2)\nassert m2 == [[7,4,1],[8,5,2],[9,6,3]]\n"
+  },
+  {
+    "id": "p7",
+    "name": "Top K 频率",
+    "difficulty": "medium",
+    "prompt": "实现 top_k_frequent(nums, k)，返回数组中出现频率前 k 高的元素列表。时间复杂度优于 O(n log n)。",
+    "test_code": "\nresult = top_k_frequent([1,1,1,2,2,3], 2)\nassert set(result) == {1, 2}\nresult = top_k_frequent([1], 1)\nassert result == [1]\nresult = top_k_frequent([4,4,4,1,1,2,2,2,3,3,3], 3)\nassert set(result) == {4, 2, 3}\n"
+  },
+  {
+    "id": "p8",
+    "name": "最小窗口子串",
+    "difficulty": "hard",
+    "prompt": "实现 min_window(s, t)，在 s 中找到包含 t 所有字符的最小子串。不存在返回空串。",
+    "test_code": "\nassert min_window(\"ADOBECODEBANC\", \"ABC\") == \"BANC\"\nassert min_window(\"a\", \"a\") == \"a\"\nassert min_window(\"a\", \"aa\") == \"\"\nassert min_window(\"aa\", \"aa\") == \"aa\"\n"
+  },
+  {
+    "id": "p9",
+    "name": "扁平化嵌套迭代器",
+    "difficulty": "medium",
+    "prompt": "实现 flatten(nested)，将嵌套列表扁平化。例如 [[1,2],[3,[4,5]],6] -> [1,2,3,4,5,6]。",
+    "test_code": "\nassert flatten([[1,2],[3,[4,5]],6]) == [1,2,3,4,5,6]\nassert flatten([1,[2,[3,[4]]]]) == [1,2,3,4]\nassert flatten([]) == []\nassert flatten([1,2,3]) == [1,2,3]\nassert flatten([[[1]]]) == [1]\n"
+  },
+  {
+    "id": "p10",
+    "name": "最长无重复子串",
+    "difficulty": "medium",
+    "prompt": "实现 length_of_longest_substring(s)，返回不含重复字符的最长子串长度。",
+    "test_code": "\nassert length_of_longest_substring(\"abcabcbb\") == 3\nassert length_of_longest_substring(\"bbbbb\") == 1\nassert length_of_longest_substring(\"pwwkew\") == 3\nassert length_of_longest_substring(\"\") == 0\nassert length_of_longest_substring(\"au\") == 2\nassert length_of_longest_substring(\"dvdf\") == 3\n"
+  },
+  {
+    "id": "p11",
+    "name": "正则表达式匹配",
+    "difficulty": "hard",
+    "prompt": "实现 is_match(s, p)，支持 '.' 匹配任意字符和 '*' 匹配零个或多个前一个字符。例如 is_match('aab', 'c*a*b') → True。不能用 re 模块。",
+    "test_code": "\nassert is_match(\"aa\", \"a\") == False\nassert is_match(\"aa\", \"a*\") == True\nassert is_match(\"ab\", \".*\") == True\nassert is_match(\"aab\", \"c*a*b\") == True\nassert is_match(\"mississippi\", \"mis*is*p*.\") == False\nassert is_match(\"\", \".*\") == True\nassert is_match(\"a\", \"\") == False\nassert is_match(\"\", \"a*\") == True\n"
+  },
+  {
+    "id": "p12",
+    "name": "接雨水",
+    "difficulty": "hard",
+    "prompt": "实现 trap(height)，给定 n 个非负整数表示每个宽度为 1 的柱子高度图，计算能接多少雨水。例如 trap([0,1,0,2,1,0,1,3,2,1,2,1]) → 6。",
+    "test_code": "\nassert trap([0,1,0,2,1,0,1,3,2,1,2,1]) == 6\nassert trap([4,2,0,3,2,5]) == 9\nassert trap([]) == 0\nassert trap([1]) == 0\nassert trap([3,3,3,3]) == 0\nassert trap([5,0,5]) == 5\n"
+  },
+  {
+    "id": "p13",
+    "name": "合并K个排序链表",
+    "difficulty": "hard",
+    "prompt": "实现 merge_k_lists(lists)，合并 K 个升序链表。输入是链表头节点数组，返回合并后的头节点。链表节点定义：class ListNode: def __init__(self, val=0, next=None): self.val = val; self.next = next。要求时间复杂度 O(N log K)。",
+    "test_code": "\ndef build_list(vals):\n    dummy = ListNode()\n    cur = dummy\n    for v in vals:\n        cur.next = ListNode(v)\n        cur = cur.next\n    return dummy.next\n\ndef to_list(head):\n    result = []\n    while head:\n        result.append(head.val)\n        head = head.next\n    return result\n\nl1 = build_list([1,4,5])\nl2 = build_list([1,3,4])\nl3 = build_list([2,6])\nresult = merge_k_lists([l1, l2, l3])\nassert to_list(result) == [1,1,2,3,4,4,5,6]\nassert to_list(merge_k_lists([])) == []\nassert to_list(merge_k_lists([None])) == []\nassert to_list(merge_k_lists([build_list([1])])) == [1]\n"
+  },
+  {
+    "id": "p14",
+    "name": "编辑距离",
+    "difficulty": "hard",
+    "prompt": "实现 min_distance(word1, word2)，计算将 word1 转换成 word2 所需的最少操作数。操作包括：插入一个字符、删除一个字符、替换一个字符。",
+    "test_code": "\nassert min_distance(\"horse\", \"ros\") == 3\nassert min_distance(\"intention\", \"execution\") == 5\nassert min_distance(\"\", \"\") == 0\nassert min_distance(\"a\", \"\") == 1\nassert min_distance(\"\", \"a\") == 1\nassert min_distance(\"abc\", \"abc\") == 0\nassert min_distance(\"kitten\", \"sitting\") == 3\n"
+  },
+  {
+    "id": "p15",
+    "name": "N皇后",
+    "difficulty": "hard",
+    "prompt": "实现 solve_n_queens(n)，返回所有 N 皇后问题的解。每个解是棋盘的字符串列表表示（'Q' 和 '.'）。返回所有不重复的解。",
+    "test_code": "\nresults = solve_n_queens(4)\nassert len(results) == 2\n# Verify each solution\nfor sol in results:\n    assert len(sol) == 4\n    queens = [(i, row.index('Q')) for i, row in enumerate(sol)]\n    # No two queens in same row, column, diagonal\n    for i in range(len(queens)):\n        for j in range(i+1, len(queens)):\n            r1, c1 = queens[i]\n            r2, c2 = queens[j]\n            assert r1 != r2 and c1 != c2\n            assert abs(r1-r2) != abs(c1-c2)\n\nresults1 = solve_n_queens(1)\nassert len(results1) == 1\nassert results1[0] == ['Q']\n\nassert len(solve_n_queens(2)) == 0\nassert len(solve_n_queens(3)) == 0\n"
+  }
+]

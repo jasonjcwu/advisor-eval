@@ -24,29 +24,52 @@ from config import ModelConfig, get_model
 
 # ─── Tool Definitions ───────────────────────────────────────────────
 
-EXECUTOR_SYSTEM_PROMPT = """\
+EXECUTOR_SYSTEM_PROMPT_SOLO = """\
 You are a coding agent. You solve software engineering tasks by reading code, 
 editing files, and running commands.
 
 You have these tools:
-- file_read: Read a file's content
+- file_read: Read a file's content (use for exploration)
+- file_edit: Replace an exact string in a file with a new string
+- bash_run: Run a bash command and get output
+
+Work methodically: explore the codebase first, identify the root cause, make
+minimal targeted edits, then verify your fix. Be concise.
+"""
+
+EXECUTOR_SYSTEM_PROMPT_ADVISOR = """\
+You are a coding agent. You solve software engineering tasks by reading code, 
+editing files, and running commands.
+
+You have these tools:
+- file_read: Read a file's content (use for exploration)
 - file_edit: Replace an exact string in a file with a new string
 - bash_run: Run a bash command and get output
 - ask_advisor: Consult a more capable model for strategic guidance
 
-**When to use ask_advisor (IMPORTANT — use it liberally):**
-- Before starting implementation, ask for architectural guidance
-- When you encounter an error you don't understand
-- After 1+ failed attempts to fix something
-- When choosing between approaches
-- When the task involves complex logic (parsing, concurrency, algorithms)
+**When to call ask_advisor (follow these rules precisely):**
+
+1. First, do exploratory work — read files, search the codebase, understand the structure
+2. BEFORE writing any code or deciding on your approach, call ask_advisor with your findings and proposed plan
+3. If you encounter an error you don't understand, call ask_advisor
+4. If your approach fails after 1+ attempts, call ask_advisor
+5. Before declaring the task done, call ask_advisor for a final review
+6. For complex tasks, call ask_advisor at least twice (before implementation + before finalizing)
+7. For simple tasks, you don't need frequent advisor calls — the first call is the most valuable
 
 **When NOT to use ask_advisor:**
-- Reading files to gather information
-- Running simple commands
+- Reading files or running simple commands during initial exploration (this is information gathering, not substantive work)
+
+**How to treat advisor advice:**
+- Take the advisor's guidance seriously — it has broader context
+- If you have concrete evidence that contradicts the advice, adapt
+- If you find a conflict between the advice and your findings, call ask_advisor again to reconcile
 
 Be concise. Focus on solving the task. Show your reasoning briefly.
 """
+
+# Default alias for backward compatibility
+EXECUTOR_SYSTEM_PROMPT = EXECUTOR_SYSTEM_PROMPT_ADVISOR
 
 ADVISOR_SYSTEM_PROMPT = """\
 You are an advisor to a coding agent. The agent is working on a software engineering task.
@@ -54,9 +77,9 @@ You are an advisor to a coding agent. The agent is working on a software enginee
 Review the conversation history and provide strategic guidance. Your advice should be:
 - A clear plan or course correction (not code to copy-paste)
 - Focused on the key decision or obstacle
-- Concise (2-4 sentences)
+- CONCISE (under 80 words)
 
-Do NOT write code. Do NOT call tools. Just provide guidance.
+Do NOT write code. Do NOT call tools. Just provide strategic guidance.
 If the agent is on the right track, say so briefly and let it continue.
 If the agent should stop (task is already solved), say "STOP: the task appears to be solved."
 """
@@ -208,6 +231,7 @@ class AdvisorAgent:
         self.max_turns = max_turns
         self.workdir = workdir
         self.verbose = verbose
+        self.include_advisor_tool = True
 
         # Create OpenAI clients
         self.executor_client = OpenAI(
@@ -287,7 +311,9 @@ class AdvisorAgent:
                 return f"Error running command: {e}"
 
         elif tool_name == "ask_advisor":
-            return self._call_advisor(args["question"])
+            # Handle both "question" and "message" parameter names
+            question = args.get("question") or args.get("message") or str(args)
+            return self._call_advisor(question)
 
         else:
             return f"Error: Unknown tool {tool_name}"
@@ -324,10 +350,10 @@ class AdvisorAgent:
         advisor_messages = [{"role": "system", "content": ADVISOR_SYSTEM_PROMPT}]
         advisor_messages.extend(self._sanitize_for_advisor(self.messages))
 
-        # Add the specific question
+        # Add the specific question with output trimming directive
         advisor_messages.append({
             "role": "user",
-            "content": f"[Advisor request]: {question}",
+            "content": f"[Advisor request]: {question}\n\n(Advisor: please keep your guidance under 80 words — I need a focused starting point, not a comprehensive plan.)",
         })
 
         t0 = time.time()
@@ -378,8 +404,10 @@ class AdvisorAgent:
             start_time=time.time(),
         )
 
+        # Use advisor-aware or solo system prompt
+        system_prompt = EXECUTOR_SYSTEM_PROMPT_ADVISOR if self.include_advisor_tool else EXECUTOR_SYSTEM_PROMPT_SOLO
         self.messages = [
-            {"role": "system", "content": EXECUTOR_SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": task},
         ]
 
@@ -391,12 +419,21 @@ class AdvisorAgent:
 
             t0 = time.time()
             try:
+                # Disable thinking mode for executors that support it (DeepSeek V4 Flash)
+                extra_kwargs = {}
+                if hasattr(self.executor_cfg, 'disable_thinking') and self.executor_cfg.disable_thinking:
+                    extra_kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
+                # Build tools list (optionally exclude ask_advisor)
+                tools = TOOLS if self.executor_cfg.supports_tools else []
+                if not self.include_advisor_tool:
+                    tools = [t for t in TOOLS if t.get("function", {}).get("name") != "ask_advisor"]
                 resp = self.executor_client.chat.completions.create(
                     model=self.executor_cfg.name,
                     messages=self.messages,
-                    tools=TOOLS if self.executor_cfg.supports_tools else [],
+                    tools=tools,
                     max_tokens=self.executor_cfg.max_tokens,
                     temperature=0.2,
+                    **extra_kwargs,
                 )
             except Exception as e:
                 self.metrics.error = f"Executor API error: {e}"
@@ -416,8 +453,16 @@ class AdvisorAgent:
             msg = resp.choices[0].message
             finish_reason = resp.choices[0].finish_reason
 
+            # Handle GLM/DeepSeek thinking mode: content may be empty, actual text in reasoning_content
+            content = msg.content or ""
+            reasoning_content = getattr(msg, "reasoning_content", None)
+            if not content.strip() and reasoning_content:
+                content = reasoning_content
+
             # Add assistant response to history
-            assistant_msg = {"role": "assistant", "content": msg.content or ""}
+            assistant_msg = {"role": "assistant", "content": content}
+            if reasoning_content:
+                assistant_msg["reasoning_content"] = reasoning_content
             if msg.tool_calls:
                 assistant_msg["tool_calls"] = [
                     {
@@ -434,7 +479,7 @@ class AdvisorAgent:
 
             # Check if done
             if not msg.tool_calls or finish_reason == "stop":
-                self.metrics.final_answer = msg.content or ""
+                self.metrics.final_answer = content
                 self._log(f"✅ Done (finish_reason={finish_reason})")
                 break
 

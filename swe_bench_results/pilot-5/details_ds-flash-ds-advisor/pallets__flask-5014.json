@@ -1,0 +1,21 @@
+{
+  "instance_id": "pallets__flask-5014",
+  "model_name_or_path": "deepseek-v4-flash+deepseek-chat",
+  "model_patch": "diff --git a/src/flask/blueprints.py b/src/flask/blueprints.py\nindex eb50585d..e003f788 100644\n--- a/src/flask/blueprints.py\n+++ b/src/flask/blueprints.py\n@@ -193,6 +193,9 @@ class Blueprint(Scaffold):\n         if \".\" in name:\n             raise ValueError(\"'name' may not contain a dot '.' character.\")\n \n+        if not name or not name.strip():\n+            raise ValueError(\"'name' must not be empty.\")\n+\n         self.name = name\n         self.url_prefix = url_prefix\n         self.subdomain = subdomain\n",
+  "metrics": {
+    "executor_input_tokens": 61606,
+    "executor_output_tokens": 2410,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 7,
+      "file_read": 2,
+      "file_edit": 2
+    },
+    "num_turns": 12,
+    "total_seconds": 29.2,
+    "cost_usd": 0.005,
+    "error": null
+  }
+}

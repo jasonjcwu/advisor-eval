@@ -1,0 +1,22 @@
+{
+  "instance_id": "sphinx-doc__sphinx-11510",
+  "model_name_or_path": "deepseek-v4-flash",
+  "model_patch": "diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py\nindex 19f7c0a8d..c16ab2d17 100644\n--- a/sphinx/directives/other.py\n+++ b/sphinx/directives/other.py\n@@ -378,6 +378,13 @@ class Include(BaseInclude, SphinxDirective):\n         self.env.note_included(filename)\n         return super().run()\n \n+    def read_file(self, path: str, /) -> str:\n+        \"\"\"Read the included file and emit the 'source-read' event.\"\"\"\n+        text = super().read_file(path)\n+        arg = [text]\n+        self.env.events.emit('source-read', path, arg)\n+        return arg[0]\n+\n \n def setup(app: Sphinx) -> dict[str, Any]:\n     directives.register_directive('toctree', TocTree)\n",
+  "metrics": {
+    "executor_input_tokens": 639169,
+    "executor_output_tokens": 4737,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 19,
+      "file_read": 9,
+      "ask_advisor": 1,
+      "file_edit": 1
+    },
+    "num_turns": 30,
+    "total_seconds": 67.7,
+    "cost_usd": 0.0462,
+    "error": "Max turns reached"
+  }
+}

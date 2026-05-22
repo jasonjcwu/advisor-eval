@@ -1,0 +1,10 @@
+{
+  "config": "ds-flash-solo",
+  "dataset": "princeton-nlp/SWE-bench_Verified",
+  "total_instances": 5,
+  "completed": 5,
+  "patches_generated": 5,
+  "tokens_in": 8634,
+  "tokens_out": 5046,
+  "total_latency_s": 38.1
+}

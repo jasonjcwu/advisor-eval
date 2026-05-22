@@ -1,0 +1,10 @@
+{
+  "exec": "claude-haiku-4-5-20251001",
+  "adv": "claude-opus-4-7",
+  "mode": "advisor",
+  "total": 1,
+  "completed": 1,
+  "patches": 0,
+  "adv_calls": 0,
+  "tokens_in": 970
+}

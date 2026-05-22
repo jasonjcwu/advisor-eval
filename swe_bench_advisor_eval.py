@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-SWE-bench Advisor Evaluation Framework
+SWE-bench Advisor Evaluation Framework (Agent Loop Edition)
 
-Generates patch predictions using:
-  1. Executor-only (baseline)
-  2. Executor + Advisor (experimental)
+Runs SWE-bench tasks through a multi-turn agent loop:
+  - Baseline: executor-only agent (no advisor tool)
+  - Experimental: executor agent + advisor tool (calls stronger model on demand)
 
-Then submits to Modal for SWE-bench evaluation.
+The agent has tools: file_read, file_edit, bash_run, ask_advisor.
+It iterates up to N turns, calling tools as needed, consulting the advisor
+when stuck.
 
 Usage:
-  # Generate predictions for 20-sample pilot
-  python3 swe_bench_advisor_eval.py --mode generate --n 20 --run_id pilot
+  # Generate predictions for 5-sample pilot
+  python3 swe_bench_advisor_eval.py --mode generate --n 5 --run_id pilot
 
   # Generate predictions for full Verified (500)
   python3 swe_bench_advisor_eval.py --mode generate --run_id full
@@ -25,11 +27,21 @@ Usage:
 import argparse
 import json
 import os
-import re
+import subprocess
 import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+
+PROJECT_DIR = Path(__file__).parent.resolve()
+sys.path.insert(0, str(PROJECT_DIR))
+
+from agent_loop import AdvisorAgent, RunMetrics, TOOLS, EXECUTOR_SYSTEM_PROMPT, ADVISOR_SYSTEM_PROMPT
+from config import ModelConfig, get_model, MODELS, EVAL_PAIRS
 
 # ---------------------------------------------------------------------------
 # Config
@@ -39,44 +51,27 @@ DATASETS = {
     "verified": "princeton-nlp/SWE-bench_Verified",
     "lite": "princeton-nlp/SWE-bench_Lite",
     "full": "princeton-nlp/SWE-bench",
+    "multilingual": "SWE-bench/SWE-bench_Multilingual",
 }
 
-# Model configurations for advisor comparison
-MODEL_CONFIGS = {
-    # Baseline: executor only (cheap model, no advisor)
-    "ds-flash-solo": {
-        "executor_model": "deepseek-chat",
-        "executor_key_env": "DEEPSEEK_API_KEY",
-        "executor_base_url": "https://api.deepseek.com",
-        "advisor_model": None,
-    },
-    # Experimental: cheap executor + strong advisor
-    "ds-flash-ds-pro-advisor": {
-        "executor_model": "deepseek-chat",
-        "executor_key_env": "DEEPSEEK_API_KEY",
-        "executor_base_url": "https://api.deepseek.com",
-        "advisor_model": "deepseek-reasoner",
-        "advisor_key_env": "DEEPSEEK_API_KEY",
-        "advisor_base_url": "https://api.deepseek.com",
-    },
-    "glm4flash-solo": {
-        "executor_model": "glm-4-flash",
-        "executor_key_env": "GLM_API_KEY",
-        "executor_base_url": "https://open.bigmodel.cn/api/paas/v4",
-        "advisor_model": None,
-    },
-    "glm4flash-glm51-advisor": {
-        "executor_model": "glm-4-flash",
-        "executor_key_env": "GLM_API_KEY",
-        "executor_base_url": "https://open.bigmodel.cn/api/paas/v4",
-        "advisor_model": "glm-5.1",
-        "advisor_key_env": "GLM_API_KEY",
-        "advisor_base_url": "https://open.bigmodel.cn/api/paas/v4",
-    },
+# Model pair configurations for advisor comparison.
+# Each config specifies (executor_model, advisor_model_or_None).
+# These map to models defined in config.py.
+AGENT_CONFIGS = {
+    # ── Solo baselines (no advisor) ──
+    "ds-solo": ("deepseek-chat", None),
+    "ds-flash-solo": ("deepseek-v4-flash", None),
+    "glm-air-solo": ("glm-4.5-air", None),
+
+    # ── Advisor pairs (cheap executor + strong advisor) ──
+    # Mirrors Anthropic's Haiku+Opus pattern
+    "glm-air-glm51-advisor": ("glm-4.5-air", "glm-5.1"),
+    "ds-flash-glm51-advisor": ("deepseek-v4-flash", "glm-5.1"),
+    "glm-air-ds-advisor": ("glm-4.5-air", "deepseek-chat"),
+    "ds-flash-ds-advisor": ("deepseek-v4-flash", "deepseek-chat"),
 }
 
 RESULTS_DIR = Path("/root/advisor-eval/swe_bench_results")
-
 
 # ---------------------------------------------------------------------------
 # Dataset loading
@@ -98,277 +93,186 @@ def load_dataset(dataset_name: str, n: Optional[int] = None) -> List[Dict]:
 
 
 # ---------------------------------------------------------------------------
-# Patch generation (single model call)
+# Workspace setup (git clone for SWE-bench)
 # ---------------------------------------------------------------------------
 
-SYSTEM_PROMPT_PATCH = """You are an expert software engineer. Given a GitHub issue description
-and relevant repository context, generate a minimal patch that resolves the issue.
+def setup_task_workspace(task: dict, base_dir: str = "/tmp/swe-workspaces") -> str:
+    """Clone the repo at the right commit for a SWE-bench task."""
+    repo = task.get("repo", "")
+    base_commit = task.get("base_commit", "")
+    instance_id = task.get("instance_id", "unknown")
 
-Rules:
-1. Output ONLY a unified diff patch (git diff format)
-2. The patch must be complete and apply cleanly
-3. Do NOT modify test files unless the issue explicitly requires it
-4. Keep changes minimal — fix only what the issue describes
-5. If unsure about exact line numbers, make your best guess based on context
+    workspace = os.path.join(base_dir, instance_id.replace("/", "__"))
 
-Format:
-```diff
-diff --git a/path/to/file.py b/path/to/file.py
---- a/path/to/file.py
-+++ b/path/to/file.py
-@@ -start,count +start,count @@
- context line
--removed line
-+added line
-```
-"""
-
-SYSTEM_PROMPT_ADVISOR = """You are a senior staff engineer reviewing a bug fix. The executor model
-is about to generate a patch for a GitHub issue. Based on the issue description
-and repository context, provide concise guidance in under 80 words:
-
-1. Which files likely need changes
-2. What the root cause probably is
-3. Key edge cases to handle
-4. Common pitfalls for this type of fix
-
-Be specific. Do NOT write the full patch — just guide the executor."""
-
-SYSTEM_PROMPT_WITH_ADVICE = """You are an expert software engineer. Given a GitHub issue description,
-repository context, and advisor guidance, generate a minimal patch that resolves the issue.
-
-A senior engineer has provided guidance below — follow it closely.
-
-Rules:
-1. Output ONLY a unified diff patch (git diff format)
-2. The patch must be complete and apply cleanly
-3. Do NOT modify test files unless the issue explicitly requires it
-4. Keep changes minimal — fix only what the issue describes
-
-Format:
-```diff
-diff --git a/path/to/file.py b/path/to/file.py
---- a/path/to/file.py
-+++ b/path/to/file.py
-@@ -start,count +start,count @@
- context line
--removed line
-+added line
-```
-"""
-
-
-def _get_api_key(env_var: str) -> str:
-    """Get API key from env, hermes .env, or hermes auth."""
-    key = os.environ.get(env_var)
-    if key:
-        return key
-    # Try hermes .env
-    env_path = Path.home() / ".hermes" / ".env"
-    if env_path.exists():
+    if os.path.exists(workspace):
+        # Reset to clean state
         try:
-            with open(env_path) as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith(f"{env_var}=") and not line.startswith("#"):
-                        key = line.split("=", 1)[1].strip().strip("'\"")
-                        if key:
-                            return key
+            subprocess.run(
+                ["git", "checkout", "--quiet", base_commit],
+                check=True, timeout=30, capture_output=True,
+                cwd=workspace,
+            )
+            subprocess.run(
+                ["git", "clean", "-fdq"],
+                check=True, timeout=30, capture_output=True,
+                cwd=workspace,
+            )
         except Exception:
             pass
-    # Try hermes auth.json credential pool
-    auth_path = Path.home() / ".hermes" / "auth.json"
-    if auth_path.exists():
+        return workspace
+
+    os.makedirs(base_dir, exist_ok=True)
+
+    clone_url = f"https://github.com/{repo}.git"
+    print(f"  Cloning {repo}@{base_commit[:8]}...")
+
+    try:
+        subprocess.run(
+            ["git", "clone", "--quiet", clone_url, workspace],
+            check=True, timeout=120, capture_output=True,
+        )
+        subprocess.run(
+            ["git", "checkout", "--quiet", base_commit],
+            check=True, timeout=30, capture_output=True,
+            cwd=workspace,
+        )
+    except Exception as e:
+        print(f"  ⚠️ Clone failed: {e}, trying shallow clone...")
         try:
-            auth = json.loads(auth_path.read_text())
-            pool = auth.get("credential_pool", {})
-            key_map = {
-                "DEEPSEEK_API_KEY": ["deepseek", "custom:deepseek"],
-                "GLM_API_KEY": ["custom:glmcode"],
-            }
-            providers = key_map.get(env_var, [])
-            for provider in providers:
-                creds = pool.get(provider, [])
-                if isinstance(creds, list) and creds:
-                    k = creds[0].get("api_key", "") if isinstance(creds[0], dict) else ""
-                    if k:
-                        return k
+            if os.path.exists(workspace):
+                subprocess.run(["rm", "-rf", workspace], check=True)
+            subprocess.run(
+                ["git", "clone", "--depth=1", "--quiet", clone_url, workspace],
+                check=True, timeout=60, capture_output=True,
+            )
+        except Exception as e2:
+            print(f"  ❌ Shallow clone also failed: {e2}")
+            os.makedirs(workspace, exist_ok=True)
+            return workspace
+
+    return workspace
+
+
+# ---------------------------------------------------------------------------
+# Task prompt building
+# ---------------------------------------------------------------------------
+
+def build_task_prompt(task: dict) -> str:
+    """Build the executor's task prompt from a SWE-bench item."""
+    repo = task.get("repo", "unknown")
+    issue = task.get("problem_statement", "")
+    hints = task.get("hints_text", "")
+
+    prompt = f"""## Task: Fix a bug in {repo}
+
+{issue}
+
+"""
+    if hints:
+        prompt += f"## Hints\n{hints}\n\n"
+
+    prompt += """\
+## Instructions
+1. First, explore the codebase to understand the structure
+2. Identify the root cause of the issue
+3. Make minimal, targeted edits to fix it
+4. Verify your fix by running relevant tests if possible
+
+The codebase is in the current working directory. Start by listing the files.
+"""
+    return prompt
+
+
+# ---------------------------------------------------------------------------
+# Patch generation (agent loop)
+# ---------------------------------------------------------------------------
+
+def generate_patch_agent(
+    instance: Dict,
+    executor_model: str,
+    advisor_model: Optional[str],
+    max_turns: int = 15,
+) -> Dict:
+    """
+    Run the agent loop on a SWE-bench instance.
+
+    Returns a dict with:
+      - instance_id, model_name_or_path, model_patch (SWE-bench format)
+      - metrics (tokens, turns, advisor_calls, latency, cost, tool_calls)
+      - raw_output (first 500 chars of final answer)
+    """
+    instance_id = instance.get("instance_id", "unknown")
+
+    # Setup workspace (git clone)
+    workdir = setup_task_workspace(instance)
+
+    # Build prompt
+    prompt = build_task_prompt(instance)
+
+    # Create agent
+    agent = AdvisorAgent(
+        executor_model=executor_model,
+        advisor_model=advisor_model,
+        max_turns=max_turns,
+        workdir=workdir,
+        verbose=True,
+    )
+
+    # Run agent loop
+    t0 = time.time()
+    try:
+        metrics = agent.run(prompt, task_id=instance_id)
+    except Exception as e:
+        return {
+            "instance_id": instance_id,
+            "model_name_or_path": executor_model,
+            "model_patch": "",
+            "error": str(e),
+            "metrics": {},
+        }
+    total_time = time.time() - t0
+
+    # Extract patch from workspace (git diff)
+    patch = ""
+    if os.path.exists(workdir):
+        try:
+            result = subprocess.run(
+                ["git", "diff"],
+                capture_output=True, text=True,
+                cwd=workdir, timeout=30,
+            )
+            patch = result.stdout
         except Exception:
             pass
-    return ""
 
+    # Compute cost
+    executor_cfg = get_model(executor_model)
+    advisor_cfg = get_model(advisor_model) if advisor_model else None
+    cost = metrics.cost_usd(executor_cfg, advisor_cfg)
 
-def _call_model(model: str, messages: List[Dict], api_key: str,
-                base_url: str, temperature: float = 0.2,
-                max_tokens: int = 4096, timeout: int = 120) -> Dict:
-    """Call an OpenAI-compatible model."""
-    import openai
-
-    client = openai.OpenAI(api_key=api_key, base_url=base_url)
-    start = time.time()
-
-    resp = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        temperature=temperature,
-        max_tokens=max_tokens,
-        timeout=timeout,
-    )
-
-    latency = time.time() - start
-    content = resp.choices[0].message.content or ""
-    # reasoning_content fallback for GLM-5.1 / DS thinking mode
-    if not content.strip():
-        rc = getattr(resp.choices[0].message, "reasoning_content", None)
-        if rc:
-            content = rc
-
-    usage = resp.usage
-    return {
-        "content": content,
-        "tokens_in": usage.prompt_tokens if usage else 0,
-        "tokens_out": usage.completion_tokens if usage else 0,
-        "latency_s": round(latency, 1),
-    }
-
-
-def extract_patch(text: str) -> str:
-    """Extract unified diff patch from model output."""
-    # Try code block first
-    patterns = [
-        r"```diff\n(.*?)```",
-        r"```\n(.*?)```",
-        r"(diff --git .+)",
-    ]
-    for pattern in patterns:
-        m = re.search(pattern, text, re.DOTALL)
-        if m:
-            patch = m.group(1).strip()
-            if patch.startswith("diff --git"):
-                return patch
-    # Fallback: return entire text if it looks like a diff
-    if "diff --git" in text:
-        start = text.index("diff --git")
-        return text[start:].strip()
-    return ""
-
-
-def generate_patch_baseline(instance: Dict, config: Dict) -> Dict:
-    """Generate patch with executor only (no advisor)."""
-    problem = instance.get("problem_statement", "")
-    repo = instance.get("repo", "")
-    hints = instance.get("hints_text", "")
-
-    prompt = f"""Repository: {repo}
-Issue: {instance.get('instance_id', '')}
-
-## Problem Statement
-{problem}
-
-## Hints from Comments
-{hints[:2000] if hints else 'None'}
-
-Generate a patch to fix this issue."""
-
-    api_key = _get_api_key(config["executor_key_env"])
-    result = _call_model(
-        model=config["executor_model"],
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT_PATCH},
-            {"role": "user", "content": prompt},
-        ],
-        api_key=api_key,
-        base_url=config["executor_base_url"],
-    )
+    # Build model name for SWE-bench
+    if advisor_model:
+        model_name = f"{executor_model}+{advisor_model}"
+    else:
+        model_name = executor_model
 
     return {
-        "instance_id": instance["instance_id"],
-        "model_name_or_path": config["executor_model"],
-        "model_patch": extract_patch(result["content"]),
-        "tokens_in": result["tokens_in"],
-        "tokens_out": result["tokens_out"],
-        "latency_s": result["latency_s"],
-        "raw_output": result["content"][:500],
-    }
-
-
-def generate_patch_with_advisor(instance: Dict, config: Dict) -> Dict:
-    """Generate patch with executor + advisor."""
-    problem = instance.get("problem_statement", "")
-    repo = instance.get("repo", "")
-    hints = instance.get("hints_text", "")
-
-    # Step 1: Ask advisor for guidance
-    advisor_prompt = f"""Repository: {repo}
-Issue: {instance.get('instance_id', '')}
-
-## Problem Statement
-{problem}
-
-## Hints from Comments
-{hints[:2000] if hints else 'None'}
-
-The executor is about to generate a patch. What guidance do you have?
-(Advisor: please keep your guidance under 80 words — I need a focused starting point, not a comprehensive plan.)"""
-
-    advisor_key = _get_api_key(config["advisor_key_env"])
-    advisor_result = _call_model(
-        model=config["advisor_model"],
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT_ADVISOR},
-            {"role": "user", "content": advisor_prompt},
-        ],
-        api_key=advisor_key,
-        base_url=config["advisor_base_url"],
-        temperature=0.3,
-        max_tokens=512,
-    )
-
-    advice = advisor_result["content"]
-
-    # Step 2: Executor generates patch with advisor guidance
-    executor_prompt = f"""Repository: {repo}
-Issue: {instance.get('instance_id', '')}
-
-## Problem Statement
-{problem}
-
-## Hints from Comments
-{hints[:2000] if hints else 'None'}
-
-## Senior Engineer's Guidance
-{advice}
-
-Generate a patch following this guidance."""
-
-    executor_key = _get_api_key(config["executor_key_env"])
-    executor_result = _call_model(
-        model=config["executor_model"],
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT_WITH_ADVICE},
-            {"role": "user", "content": executor_prompt},
-        ],
-        api_key=executor_key,
-        base_url=config["executor_base_url"],
-    )
-
-    return {
-        "instance_id": instance["instance_id"],
-        "model_name_or_path": f"{config['executor_model']}+{config['advisor_model']}",
-        "model_patch": extract_patch(executor_result["content"]),
-        "tokens_in": executor_result["tokens_in"] + advisor_result["tokens_in"],
-        "tokens_out": executor_result["tokens_out"] + advisor_result["tokens_out"],
-        "latency_s": round(executor_result["latency_s"] + advisor_result["latency_s"], 1),
-        "advisor_advice": advice[:300],
-        "advisor_tokens": {
-            "in": advisor_result["tokens_in"],
-            "out": advisor_result["tokens_out"],
+        "instance_id": instance_id,
+        "model_name_or_path": model_name,
+        "model_patch": patch,
+        "metrics": {
+            "executor_input_tokens": metrics.executor_input_tokens,
+            "executor_output_tokens": metrics.executor_output_tokens,
+            "advisor_input_tokens": metrics.advisor_input_tokens,
+            "advisor_output_tokens": metrics.advisor_output_tokens,
+            "advisor_calls": metrics.advisor_calls,
+            "tool_calls": metrics.tool_calls,
+            "num_turns": len([t for t in metrics.turns if t.role == "executor"]),
+            "total_seconds": round(metrics.total_seconds, 1),
+            "cost_usd": round(cost, 4),
+            "error": metrics.error,
         },
-        "executor_tokens": {
-            "in": executor_result["tokens_in"],
-            "out": executor_result["tokens_out"],
-        },
-        "raw_output": executor_result["content"][:500],
+        "raw_output": metrics.final_answer[:500] if metrics.final_answer else "",
     }
 
 
@@ -377,8 +281,8 @@ Generate a patch following this guidance."""
 # ---------------------------------------------------------------------------
 
 def run_generate(args):
-    """Generate predictions for all model configs."""
-    dataset = DATASETS.get(args.dataset, args.dataset)
+    """Generate predictions for all agent configs."""
+    dataset = DATASETS.get(args.dataset, args.dataset) or args.dataset
     instances = load_dataset(dataset, args.n)
     print(f"Loaded {len(instances)} instances from {dataset}")
 
@@ -386,13 +290,14 @@ def run_generate(args):
     run_dir.mkdir(parents=True, exist_ok=True)
 
     # Determine which configs to run
-    configs_to_run = args.configs.split(",") if args.configs else list(MODEL_CONFIGS.keys())
+    configs_to_run = args.configs.split(",") if args.configs else list(AGENT_CONFIGS.keys())
 
     for config_name in configs_to_run:
-        config = MODEL_CONFIGS.get(config_name)
-        if not config:
+        if config_name not in AGENT_CONFIGS:
             print(f"Unknown config: {config_name}, skipping")
             continue
+
+        executor_model, advisor_model = AGENT_CONFIGS[config_name]
 
         predictions_path = run_dir / f"predictions_{config_name}.jsonl"
         metrics_path = run_dir / f"metrics_{config_name}.json"
@@ -406,22 +311,33 @@ def run_generate(args):
                         done_ids.add(json.loads(line)["instance_id"])
 
         remaining = [i for i in instances if i["instance_id"] not in done_ids]
-        print(f"\n[{config_name}] {len(done_ids)} done, {len(remaining)} remaining")
+        print(f"\n[{config_name}] executor={executor_model} advisor={advisor_model or 'none'}")
+        print(f"  {len(done_ids)} done, {len(remaining)} remaining")
 
         if not remaining:
-            print(f"[{config_name}] All instances already predicted")
+            print(f"  All instances already predicted")
             continue
 
-        is_advisor = config["advisor_model"] is not None
-        gen_fn = generate_patch_with_advisor if is_advisor else generate_patch_baseline
-        total_tokens = {"in": 0, "out": 0}
+        total_tokens_in = 0
+        total_tokens_out = 0
+        total_advisor_tokens = 0
         total_latency = 0
+        total_cost = 0
         patches_found = 0
+        total_advisor_calls = 0
+        total_turns = 0
 
         for idx, instance in enumerate(remaining):
             iid = instance["instance_id"]
+            print(f"\n  [{idx+1}/{len(remaining)}] {iid}")
+
             try:
-                result = gen_fn(instance, config)
+                result = generate_patch_agent(
+                    instance=instance,
+                    executor_model=executor_model,
+                    advisor_model=advisor_model,
+                    max_turns=args.max_turns,
+                )
 
                 # Write prediction in SWE-bench format
                 pred = {
@@ -433,53 +349,81 @@ def run_generate(args):
                     f.write(json.dumps(pred, ensure_ascii=False) + "\n")
 
                 # Track metrics
-                total_tokens["in"] += result["tokens_in"]
-                total_tokens["out"] += result["tokens_out"]
-                total_latency += result["latency_s"]
+                m = result.get("metrics", {})
+                exec_in = m.get("executor_input_tokens", 0)
+                exec_out = m.get("executor_output_tokens", 0)
+                adv_in = m.get("advisor_input_tokens", 0)
+                adv_out = m.get("advisor_output_tokens", 0)
+
+                total_tokens_in += exec_in
+                total_tokens_out += exec_out
+                total_advisor_tokens += adv_in + adv_out
+                total_latency += m.get("total_seconds", 0)
+                total_cost += m.get("cost_usd", 0)
+                total_advisor_calls += m.get("advisor_calls", 0)
+                total_turns += m.get("num_turns", 0)
+
                 if result["model_patch"]:
                     patches_found += 1
 
                 status = "✓" if result["model_patch"] else "✗"
-                print(f"  [{idx+1}/{len(remaining)}] {status} {iid} "
-                      f"({result['tokens_in']}↓{result['tokens_out']}↑, "
-                      f"{result['latency_s']}s)")
+                turns = m.get("num_turns", "?")
+                adv_calls = m.get("advisor_calls", 0)
+                print(f"    {status} turns={turns} advisor_calls={adv_calls} "
+                      f"tokens={exec_in+exec_in}↓{exec_out+adv_out}↑ "
+                      f"${m.get('cost_usd', 0):.4f} {m.get('total_seconds', 0)}s")
+
+                # Save per-instance detailed result
+                detail_path = run_dir / f"details_{config_name}" / f"{iid}.json"
+                detail_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(detail_path, "w") as f:
+                    json.dump(result, f, indent=2, ensure_ascii=False)
 
             except Exception as e:
-                print(f"  [{idx+1}/{len(remaining)}] ✗ {iid} ERROR: {e}")
+                print(f"    ✗ ERROR: {e}")
+                import traceback
+                traceback.print_exc()
                 # Write empty prediction so we don't retry
                 with open(predictions_path, "a") as f:
                     f.write(json.dumps({
                         "instance_id": iid,
-                        "model_name_or_path": config["executor_model"],
+                        "model_name_or_path": executor_model,
                         "model_patch": "",
                     }) + "\n")
 
-            # Save metrics after each instance
-            metrics = {
+            # Save aggregate metrics after each instance
+            agg_metrics = {
                 "config": config_name,
+                "executor_model": executor_model,
+                "advisor_model": advisor_model,
                 "dataset": dataset,
                 "total_instances": len(instances),
                 "completed": len(done_ids) + idx + 1,
                 "patches_generated": patches_found,
-                "tokens_in": total_tokens["in"],
-                "tokens_out": total_tokens["out"],
+                "executor_tokens_in": total_tokens_in,
+                "executor_tokens_out": total_tokens_out,
+                "advisor_tokens_total": total_advisor_tokens,
                 "total_latency_s": round(total_latency, 1),
+                "total_cost_usd": round(total_cost, 4),
+                "total_advisor_calls": total_advisor_calls,
+                "total_turns": total_turns,
+                "avg_turns": round(total_turns / max(idx + 1, 1), 1),
+                "avg_advisor_calls": round(total_advisor_calls / max(idx + 1, 1), 1),
             }
             with open(metrics_path, "w") as f:
-                json.dump(metrics, f, indent=2)
+                json.dump(agg_metrics, f, indent=2)
 
     print("\n=== Generation complete ===")
     print(f"Results in: {run_dir}")
 
 
 def run_evaluate(args):
-    """Submit predictions to SWE-bench evaluation (Modal)."""
+    """Submit predictions to SWE-bench evaluation (Modal or local)."""
     run_dir = RESULTS_DIR / args.run_id
     if not run_dir.exists():
         print(f"Run directory not found: {run_dir}")
         sys.exit(1)
 
-    # Find all prediction files
     pred_files = sorted(run_dir.glob("predictions_*.jsonl"))
     if not pred_files:
         print("No prediction files found")
@@ -506,37 +450,111 @@ def run_evaluate(args):
 
 
 def run_summarize(args):
-    """Summarize evaluation results."""
+    """Summarize evaluation results with loop-specific metrics."""
     run_dir = RESULTS_DIR / args.run_id
     if not run_dir.exists():
         print(f"Run directory not found: {run_dir}")
         sys.exit(1)
 
-    print(f"\n=== Summary for {args.run_id} ===\n")
+    print(f"\n{'='*70}")
+    print(f"Summary for {args.run_id}")
+    print(f"{'='*70}\n")
 
     # Load metrics
     metrics_files = sorted(run_dir.glob("metrics_*.json"))
+    rows = []
     for mf in metrics_files:
         config_name = mf.stem.replace("metrics_", "")
         with open(mf) as f:
             metrics = json.load(f)
+
+        # Support both old (single-shot) and new (agent loop) metric formats
+        exec_tokens_in = metrics.get("executor_tokens_in", metrics.get("tokens_in", 0))
+        exec_tokens_out = metrics.get("executor_tokens_out", metrics.get("tokens_out", 0))
+        advisor_tokens = metrics.get("advisor_tokens_total", 0)
+        total_cost = metrics.get("total_cost_usd", 0)
+        avg_turns = metrics.get("avg_turns", "N/A")
+        avg_advisor = metrics.get("avg_advisor_calls", "N/A")
+
+        row = {
+            "config": config_name,
+            "patches": f"{metrics['patches_generated']}/{metrics['total_instances']}",
+            "exec_tokens": f"{exec_tokens_in}↓ {exec_tokens_out}↑",
+            "advisor_tokens": str(advisor_tokens),
+            "latency": f"{metrics['total_latency_s']}s",
+            "cost": f"${total_cost:.4f}",
+            "avg_turns": str(avg_turns),
+            "avg_advisor": str(avg_advisor),
+        }
+        rows.append(row)
+
         print(f"  [{config_name}]")
-        print(f"    Patches: {metrics['patches_generated']}/{metrics['total_instances']}")
-        print(f"    Tokens: {metrics['tokens_in']}↓ {metrics['tokens_out']}↑")
-        print(f"    Latency: {metrics['total_latency_s']}s total")
+        print(f"    Patches: {row['patches']}")
+        print(f"    Executor tokens: {row['exec_tokens']}")
+        print(f"    Advisor tokens:  {row['advisor_tokens']}")
+        print(f"    Avg turns:       {row['avg_turns']}")
+        print(f"    Avg advisor calls: {row['avg_advisor']}")
+        print(f"    Latency:         {row['latency']}")
+        print(f"    Cost:            {row['cost']}")
         print()
 
-    # Check for evaluation results
+    # Comparison table: solo vs advisor for same executor
+    print(f"\n{'='*70}")
+    print("Solo vs Advisor Comparison")
+    print(f"{'='*70}\n")
+
+    configs_data = {}
+    for mf in metrics_files:
+        config_name = mf.stem.replace("metrics_", "")
+        with open(mf) as f:
+            configs_data[config_name] = json.load(f)
+
+    # Group by executor model (infer from metrics if not in AGENT_CONFIGS)
+    by_executor = {}
+    for cname, data in configs_data.items():
+        # Try new AGENT_CONFIGS first
+        if cname in AGENT_CONFIGS:
+            executor, advisor = AGENT_CONFIGS[cname]
+        else:
+            # Infer from old config data
+            executor = data.get("executor_model", data.get("config", cname))
+            advisor = data.get("advisor_model", None)
+        by_executor.setdefault(executor, []).append((cname, advisor, data))
+
+    for executor, entries in by_executor.items():
+        print(f"  Executor: {executor}")
+        for cname, advisor, m in entries:
+            label = f"+ {advisor}" if advisor else "solo"
+            patches = f"{m['patches_generated']}/{m['total_instances']}"
+            cost = m.get('total_cost_usd', 0)
+            turns = m.get('avg_turns', 'N/A')
+            adv = m.get('avg_advisor_calls', 'N/A')
+            print(f"    {label:30s} | patches={patches} | "
+                  f"turns={turns} | advisor_calls={adv} | cost=${cost:.4f}")
+        print()
+
+    # Check for evaluation results (resolved rate from SWE-bench harness)
     eval_dirs = sorted(Path("evaluation_results").glob(f"{args.run_id}_*"))
-    for ed in eval_dirs:
-        result_file = ed / "results.json"
-        if result_file.exists():
-            with open(result_file) as f:
-                results = json.load(f)
-            config_name = ed.name.replace(f"{args.run_id}_", "")
-            resolved = results.get("resolved", 0)
-            total = results.get("total", 0)
-            print(f"  [{config_name}] Resolved: {resolved}/{total} ({100*resolved/total:.1f}%)")
+    if eval_dirs:
+        print(f"\n{'='*70}")
+        print("SWE-bench Evaluation Results")
+        print(f"{'='*70}\n")
+        for ed in eval_dirs:
+            result_file = ed / "results.json"
+            if result_file.exists():
+                with open(result_file) as f:
+                    results = json.load(f)
+                config_name = ed.name.replace(f"{args.run_id}_", "")
+                resolved = results.get("resolved", 0)
+                total = results.get("total", 0)
+                pct = 100 * resolved / total if total else 0
+                print(f"  [{config_name}] Resolved: {resolved}/{total} ({pct:.1f}%)")
+
+    # Save comparison JSON
+    comparison_path = run_dir / "comparison.json"
+    with open(comparison_path, "w") as f:
+        json.dump({"configs": configs_data, "rows": rows}, f, indent=2, ensure_ascii=False)
+    print(f"\nComparison saved: {comparison_path}")
 
 
 # ---------------------------------------------------------------------------
@@ -544,13 +562,30 @@ def run_summarize(args):
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="SWE-bench Advisor Evaluation")
-    parser.add_argument("--mode", choices=["generate", "evaluate", "summarize"], required=True)
+    parser = argparse.ArgumentParser(
+        description="SWE-bench Advisor Evaluation (Agent Loop Edition)"
+    )
+    parser.add_argument(
+        "--mode", choices=["generate", "evaluate", "summarize"],
+        required=True,
+    )
     parser.add_argument("--run_id", required=True, help="Unique run identifier")
-    parser.add_argument("--dataset", default="verified", help="Dataset: verified, lite, full, or HF path")
-    parser.add_argument("--n", type=int, default=None, help="Number of instances (default: all)")
-    parser.add_argument("--configs", default=None, help="Comma-separated config names (default: all)")
-    parser.add_argument("--modal", action="store_true", help="Use Modal for evaluation")
+    parser.add_argument(
+        "--dataset", default="verified",
+        help="Dataset: verified, lite, full, multilingual, or HF path",
+    )
+    parser.add_argument("--n", type=int, default=None, help="Number of instances")
+    parser.add_argument(
+        "--configs", default=None,
+        help="Comma-separated config names (default: all)",
+    )
+    parser.add_argument(
+        "--max_turns", type=int, default=15,
+        help="Max agent loop turns per instance (default: 15)",
+    )
+    parser.add_argument(
+        "--modal", action="store_true", help="Use Modal for evaluation",
+    )
     args = parser.parse_args()
 
     if args.mode == "generate":

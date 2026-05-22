@@ -1,0 +1,21 @@
+{
+  "instance_id": "pydata__xarray-4075",
+  "model_name_or_path": "glm-4.5-air",
+  "model_patch": "diff --git a/xarray/core/weighted.py b/xarray/core/weighted.py\nindex 996d2e4c..8f40e167 100644\n--- a/xarray/core/weighted.py\n+++ b/xarray/core/weighted.py\n@@ -142,7 +142,7 @@ class Weighted:\n         # we need to mask data values that are nan; else the weights are wrong\n         mask = da.notnull()\n \n-        sum_of_weights = self._reduce(mask, self.weights, dim=dim, skipna=False)\n+        sum_of_weights = self._reduce(mask, self.weights.astype(float), dim=dim, skipna=False)\n \n         # 0-weights are not valid\n         valid_weights = sum_of_weights != 0.0\n",
+  "metrics": {
+    "executor_input_tokens": 121527,
+    "executor_output_tokens": 4517,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 7,
+      "file_read": 5,
+      "file_edit": 3
+    },
+    "num_turns": 15,
+    "total_seconds": 163.9,
+    "cost_usd": 0.0126,
+    "error": "Max turns reached"
+  }
+}

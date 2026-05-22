@@ -1,0 +1,20 @@
+{
+  "instance_id": "sphinx-doc__sphinx-11510",
+  "model_name_or_path": "deepseek-v4-flash+deepseek-chat",
+  "model_patch": "diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py\nindex 19f7c0a8d..50ac83e54 100644\n--- a/sphinx/directives/other.py\n+++ b/sphinx/directives/other.py\n@@ -376,7 +376,40 @@ class Include(BaseInclude, SphinxDirective):\n         rel_filename, filename = self.env.relfn2path(self.arguments[0])\n         self.arguments[0] = filename\n         self.env.note_included(filename)\n-        return super().run()\n+\n+        # Set up settings and options like the parent's run() method\n+        self.settings = self.state.document.settings\n+        if not self.settings.file_insertion_enabled:\n+            raise self.warning('\"%s\" directive disabled.' % self.name)\n+        self.tab_width = self.options.get('tab-width', self.settings.tab_width)\n+        self.clip_options = (self.options.get('start-line', None),\n+                             self.options.get('end-line', None),\n+                             self.options.get('start-after', ''),\n+                             self.options.get('end-before', ''))\n+\n+        path = directives.path(self.arguments[0])\n+        root_prefix = self.settings.root_prefix\n+        from docutils.parsers.rst.directives.misc import adapt_path\n+        path = adapt_path(path,\n+                          self.state.document.current_source,\n+                          root_prefix)\n+        self.options['source'] = path\n+\n+        inputstring = self.read_file(path)\n+\n+        # emit \"source-read\" event for the included file\n+        arg = [inputstring]\n+        self.env.events.emit('source-read', rel_filename, arg)\n+        inputstring = arg[0]\n+\n+        if 'literal' in self.options:\n+            return self.as_literal_block(inputstring)\n+        if 'code' in self.options:\n+            return self.as_code_block(inputstring)\n+        if 'parser' in self.options:\n+            return self.custom_parse(inputstring)\n+        self.insert_into_input_lines(inputstring)\n+        return []\n \n \n def setup(app: Sphinx) -> dict[str, Any]:\n",
+  "metrics": {
+    "executor_input_tokens": 216547,
+    "executor_output_tokens": 2136,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 14,
+      "file_read": 4
+    },
+    "num_turns": 15,
+    "total_seconds": 28.6,
+    "cost_usd": 0.0158,
+    "error": "Max turns reached"
+  }
+}

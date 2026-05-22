@@ -1,0 +1,20 @@
+{
+  "instance_id": "pylint-dev__pylint-4970",
+  "model_name_or_path": "glm-4.5-air+glm-5.1",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 118822,
+    "executor_output_tokens": 1789,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 12,
+      "file_read": 3
+    },
+    "num_turns": 15,
+    "total_seconds": 57.8,
+    "cost_usd": 0.0121,
+    "error": "Max turns reached"
+  }
+}

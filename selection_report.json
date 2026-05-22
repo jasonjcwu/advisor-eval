@@ -1,0 +1,133 @@
+{
+  "selection_method": "stratified sampling by difficulty + repo diversity",
+  "seed": 42,
+  "source_dataset": "princeton-nlp/SWE-bench_Verified",
+  "total_in_source": 500,
+  "selected": 20,
+  "difficulty_distribution": {
+    "easy (<15 min)": 7,
+    "medium (15min-1h)": 7,
+    "hard (1-4h)": 6
+  },
+  "repo_distribution": {
+    "pytest-dev/pytest": 2,
+    "pallets/flask": 1,
+    "scikit-learn/scikit-learn": 2,
+    "pydata/xarray": 3,
+    "pylint-dev/pylint": 2,
+    "sphinx-doc/sphinx": 2,
+    "psf/requests": 2,
+    "mwaskom/seaborn": 1,
+    "matplotlib/matplotlib": 1,
+    "sympy/sympy": 2,
+    "django/django": 2
+  },
+  "selection_criteria": [
+    "1. Stratified by difficulty: easy 7, medium 7, hard 6",
+    "2. Within each tier, round-robin by repo for diversity",
+    "3. Excluded >4 hours (only 3 in source, too hard for small eval)",
+    "4. Random seed=42 for reproducibility"
+  ],
+  "instances": [
+    {
+      "instance_id": "pytest-dev__pytest-10081",
+      "repo": "pytest-dev/pytest",
+      "difficulty": "<15 min fix"
+    },
+    {
+      "instance_id": "pallets__flask-5014",
+      "repo": "pallets/flask",
+      "difficulty": "<15 min fix"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-11310",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "<15 min fix"
+    },
+    {
+      "instance_id": "pydata__xarray-4075",
+      "repo": "pydata/xarray",
+      "difficulty": "<15 min fix"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-4970",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "<15 min fix"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-10323",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "<15 min fix"
+    },
+    {
+      "instance_id": "psf__requests-1142",
+      "repo": "psf/requests",
+      "difficulty": "<15 min fix"
+    },
+    {
+      "instance_id": "psf__requests-2931",
+      "repo": "psf/requests",
+      "difficulty": "15 min - 1 hour"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3069",
+      "repo": "mwaskom/seaborn",
+      "difficulty": "15 min - 1 hour"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-14623",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour"
+    },
+    {
+      "instance_id": "sympy__sympy-11618",
+      "repo": "sympy/sympy",
+      "difficulty": "15 min - 1 hour"
+    },
+    {
+      "instance_id": "pydata__xarray-2905",
+      "repo": "pydata/xarray",
+      "difficulty": "15 min - 1 hour"
+    },
+    {
+      "instance_id": "django__django-10973",
+      "repo": "django/django",
+      "difficulty": "15 min - 1 hour"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-10051",
+      "repo": "pytest-dev/pytest",
+      "difficulty": "15 min - 1 hour"
+    },
+    {
+      "instance_id": "sympy__sympy-12489",
+      "repo": "sympy/sympy",
+      "difficulty": "1-4 hours"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25102",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "1-4 hours"
+    },
+    {
+      "instance_id": "pydata__xarray-3993",
+      "repo": "pydata/xarray",
+      "difficulty": "1-4 hours"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-4551",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "1-4 hours"
+    },
+    {
+      "instance_id": "django__django-10554",
+      "repo": "django/django",
+      "difficulty": "1-4 hours"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-11510",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "1-4 hours"
+    }
+  ]
+}

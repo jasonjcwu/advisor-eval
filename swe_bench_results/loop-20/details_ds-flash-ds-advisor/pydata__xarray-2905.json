@@ -1,0 +1,20 @@
+{
+  "instance_id": "pydata__xarray-2905",
+  "model_name_or_path": "deepseek-v4-flash+deepseek-chat",
+  "model_patch": "diff --git a/xarray/core/variable.py b/xarray/core/variable.py\nindex 45553eb9..8f6d8cc1 100644\n--- a/xarray/core/variable.py\n+++ b/xarray/core/variable.py\n@@ -218,7 +218,8 @@ def as_compatible_data(data, fastpath=False):\n         data = np.timedelta64(getattr(data, \"value\", data), \"ns\")\n \n     # we don't want nested self-described arrays\n-    data = getattr(data, \"values\", data)\n+    if isinstance(data, (pd.Series, pd.DataFrame)):\n+        data = data.values\n \n     if isinstance(data, np.ma.MaskedArray):\n         mask = np.ma.getmaskarray(data)\n",
+  "metrics": {
+    "executor_input_tokens": 155482,
+    "executor_output_tokens": 2287,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 13,
+      "file_read": 3
+    },
+    "num_turns": 15,
+    "total_seconds": 29.3,
+    "cost_usd": 0.0116,
+    "error": "Max turns reached"
+  }
+}

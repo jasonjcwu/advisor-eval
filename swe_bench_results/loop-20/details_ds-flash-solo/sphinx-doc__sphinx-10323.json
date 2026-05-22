@@ -1,0 +1,20 @@
+{
+  "instance_id": "sphinx-doc__sphinx-10323",
+  "model_name_or_path": "deepseek-v4-flash",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 57991,
+    "executor_output_tokens": 957,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 12,
+      "file_read": 3
+    },
+    "num_turns": 15,
+    "total_seconds": 18.0,
+    "cost_usd": 0.0043,
+    "error": "Max turns reached"
+  }
+}

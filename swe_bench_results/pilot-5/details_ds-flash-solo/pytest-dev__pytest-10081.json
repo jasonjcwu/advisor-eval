@@ -1,0 +1,20 @@
+{
+  "instance_id": "pytest-dev__pytest-10081",
+  "model_name_or_path": "deepseek-v4-flash",
+  "model_patch": "diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py\nindex 851e4943b..338bcd42f 100644\n--- a/src/_pytest/unittest.py\n+++ b/src/_pytest/unittest.py\n@@ -316,7 +316,7 @@ class TestCaseFunction(Function):\n             # Arguably we could always postpone tearDown(), but this changes the moment where the\n             # TestCase instance interacts with the results object, so better to only do it\n             # when absolutely needed.\n-            if self.config.getoption(\"usepdb\") and not _is_skipped(self.obj):\n+            if self.config.getoption(\"usepdb\") and not _is_skipped(self._testcase):\n                 self._explicit_tearDown = self._testcase.tearDown\n                 setattr(self._testcase, \"tearDown\", lambda *args: None)\n \n",
+  "metrics": {
+    "executor_input_tokens": 707429,
+    "executor_output_tokens": 11854,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 27,
+      "file_read": 6
+    },
+    "num_turns": 30,
+    "total_seconds": 147.0,
+    "cost_usd": 0.0531,
+    "error": "Max turns reached"
+  }
+}

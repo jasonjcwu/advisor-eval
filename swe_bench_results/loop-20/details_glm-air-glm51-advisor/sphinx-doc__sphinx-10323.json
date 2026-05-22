@@ -1,0 +1,21 @@
+{
+  "instance_id": "sphinx-doc__sphinx-10323",
+  "model_name_or_path": "glm-4.5-air+glm-5.1",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 148976,
+    "executor_output_tokens": 2362,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 9,
+      "file_read": 5,
+      "file_edit": 1
+    },
+    "num_turns": 15,
+    "total_seconds": 71.4,
+    "cost_usd": 0.0151,
+    "error": "Max turns reached"
+  }
+}

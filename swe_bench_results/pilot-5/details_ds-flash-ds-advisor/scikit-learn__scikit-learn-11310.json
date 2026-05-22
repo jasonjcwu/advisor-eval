@@ -1,0 +1,21 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-11310",
+  "model_name_or_path": "deepseek-v4-flash+deepseek-chat",
+  "model_patch": "diff --git a/sklearn/grid_search.py b/sklearn/grid_search.py\nindex 6ba673d2fb..e99325f0a8 100644\n--- a/sklearn/grid_search.py\n+++ b/sklearn/grid_search.py\n@@ -15,6 +15,7 @@ from collections import Mapping, namedtuple, Sized\n from functools import partial, reduce\n from itertools import product\n import operator\n+import time\n import warnings\n \n import numpy as np\n@@ -616,10 +617,13 @@ class BaseSearchCV(six.with_metaclass(ABCMeta, BaseEstimator,\n             # clone first to work around broken estimators\n             best_estimator = clone(base_estimator).set_params(\n                 **best.parameters)\n+            refit_start = time.time()\n             if y is not None:\n                 best_estimator.fit(X, y, **self.fit_params)\n             else:\n                 best_estimator.fit(X, **self.fit_params)\n+            refit_end = time.time()\n+            self.refit_time_ = refit_end - refit_start\n             self.best_estimator_ = best_estimator\n         return self\n \ndiff --git a/sklearn/model_selection/_search.py b/sklearn/model_selection/_search.py\nindex 99d6096af7..09259e8efa 100644\n--- a/sklearn/model_selection/_search.py\n+++ b/sklearn/model_selection/_search.py\n@@ -17,6 +17,7 @@ from collections import Mapping, namedtuple, defaultdict, Sequence, Iterable\n from functools import partial, reduce\n from itertools import product\n import operator\n+import time\n import warnings\n \n import numpy as np\n@@ -766,10 +767,13 @@ class BaseSearchCV(six.with_metaclass(ABCMeta, BaseEstimator,\n         if self.refit:\n             self.best_estimator_ = clone(base_estimator).set_params(\n                 **self.best_params_)\n+            refit_start = time.time()\n             if y is not None:\n                 self.best_estimator_.fit(X, y, **fit_params)\n             else:\n                 self.best_estimator_.fit(X, **fit_params)\n+            refit_end = time.time()\n+            self.refit_time_ = refit_end - refit_start\n \n         # Store the only scorer not as a dict for single metric evaluation\n         self.scorer_ = scorers if self.multimetric_ else scorers['score']\n@@ -1076,6 +1080,10 @@ class GridSearchCV(BaseSearchCV):\n     n_splits_ : int\n         The number of cross-validation splits (folds/iterations).\n \n+    refit_time_ : float\n+        The time (in seconds) it took to refit the best model on the full\n+        dataset. Only available if ``refit`` is set.\n+\n     Notes\n     ------\n     The parameters selected are those that maximize the score of the left out\n@@ -1387,6 +1395,10 @@ class RandomizedSearchCV(BaseSearchCV):\n     n_splits_ : int\n         The number of cross-validation splits (folds/iterations).\n \n+    refit_time_ : float\n+        The time (in seconds) it took to refit the best model on the full\n+        dataset. Only available if ``refit`` is set.\n+\n     Notes\n     -----\n     The parameters selected are those that maximize the score of the held-out\n",
+  "metrics": {
+    "executor_input_tokens": 405166,
+    "executor_output_tokens": 4543,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {
+      "bash_run": 22,
+      "file_read": 2,
+      "file_edit": 6
+    },
+    "num_turns": 30,
+    "total_seconds": 56.9,
+    "cost_usd": 0.0297,
+    "error": "Max turns reached"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-11310",
+  "model_name_or_path": "deepseek-v4-flash+deepseek-chat",
+  "model_patch": "diff --git a/sklearn/model_selection/_search.py b/sklearn/model_selection/_search.py\nindex 99d6096af7..52ce91ff8b 100644\n--- a/sklearn/model_selection/_search.py\n+++ b/sklearn/model_selection/_search.py\n@@ -17,6 +17,7 @@ from collections import Mapping, namedtuple, defaultdict, Sequence, Iterable\n from functools import partial, reduce\n from itertools import product\n import operator\n+import time\n import warnings\n \n import numpy as np\n",
+  "metrics": {
+    "executor_input_tokens": 136749,
+    "executor_output_tokens": 1663,
+    "advisor_input_tokens": 13910,
+    "advisor_output_tokens": 66,
+    "advisor_calls": 1,
+    "tool_calls": {
+      "bash_run": 12,
+      "file_read": 3,
+      "ask_advisor": 1,
+      "file_edit": 1
+    },
+    "num_turns": 15,
+    "total_seconds": 22.7,
+    "cost_usd": 0.0139,
+    "error": "Max turns reached"
+  }
+}

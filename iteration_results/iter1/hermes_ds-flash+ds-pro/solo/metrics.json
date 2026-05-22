@@ -1,0 +1,12 @@
+{
+  "track": "hermes",
+  "iteration": 1,
+  "executor": "deepseek-v4-flash",
+  "advisor": null,
+  "mode": "solo",
+  "total": 1,
+  "patches": 0,
+  "tokens_in": 3113,
+  "tokens_out": 415,
+  "advisor_calls": 0
+}

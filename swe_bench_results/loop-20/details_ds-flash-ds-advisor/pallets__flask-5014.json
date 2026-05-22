@@ -1,0 +1,21 @@
+{
+  "instance_id": "pallets__flask-5014",
+  "model_name_or_path": "deepseek-v4-flash+deepseek-chat",
+  "model_patch": "",
+  "metrics": {
+    "executor_input_tokens": 123591,
+    "executor_output_tokens": 1295,
+    "advisor_input_tokens": 9946,
+    "advisor_output_tokens": 67,
+    "advisor_calls": 1,
+    "tool_calls": {
+      "bash_run": 8,
+      "file_read": 6,
+      "ask_advisor": 1
+    },
+    "num_turns": 15,
+    "total_seconds": 18.9,
+    "cost_usd": 0.0118,
+    "error": "Max turns reached"
+  }
+}

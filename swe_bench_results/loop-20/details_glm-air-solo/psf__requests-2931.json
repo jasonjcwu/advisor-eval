@@ -1,0 +1,17 @@
+{
+  "instance_id": "psf__requests-2931",
+  "model_name_or_path": "glm-4.5-air",
+  "model_patch": "diff --git a/requests/cookies.py b/requests/cookies.py\nindex d61ec2da..84fec100 100644\n--- a/requests/cookies.py\n+++ b/requests/cookies.py\n@@ -9,6 +9,7 @@ requests.utils imports from here, so be careful with imports.\n import copy\n import time\n import collections\n+import collections.abc\n from .compat import cookielib, urlparse, urlunparse, Morsel\n \n try:\n@@ -160,7 +161,7 @@ class CookieConflictError(RuntimeError):\n     Use .get and .set and include domain and path args in order to be more specific.\"\"\"\n \n \n-class RequestsCookieJar(cookielib.CookieJar, collections.MutableMapping):\n+class RequestsCookieJar(cookielib.CookieJar, collections.abc.MutableMapping):\n     \"\"\"Compatibility class; is a cookielib.CookieJar, but exposes a dict\n     interface.\n \ndiff --git a/requests/sessions.py b/requests/sessions.py\nindex 9eaa36ae..181effbb 100644\n--- a/requests/sessions.py\n+++ b/requests/sessions.py\n@@ -9,7 +9,7 @@ requests (cookies, auth, proxies).\n \n \"\"\"\n import os\n-from collections import Mapping\n+from collections.abc import Mapping\n from datetime import datetime\n \n from .auth import _basic_auth_str\ndiff --git a/requests/structures.py b/requests/structures.py\nindex 3e5f2faa..22fa0c45 100644\n--- a/requests/structures.py\n+++ b/requests/structures.py\n@@ -9,9 +9,10 @@ Data structures that power Requests.\n \"\"\"\n \n import collections\n+import collections.abc\n \n \n-class CaseInsensitiveDict(collections.MutableMapping):\n+class CaseInsensitiveDict(collections.abc.MutableMapping):\n     \"\"\"\n     A case-insensitive ``dict``-like object.\n \n@@ -71,7 +72,7 @@ class CaseInsensitiveDict(collections.MutableMapping):\n         )\n \n     def __eq__(self, other):\n-        if isinstance(other, collections.Mapping):\n+        if isinstance(other, collections.abc.Mapping):\n             other = CaseInsensitiveDict(other)\n         else:\n             return NotImplemented\n",
+  "metrics": {
+    "executor_input_tokens": 0,
+    "executor_output_tokens": 0,
+    "advisor_input_tokens": 0,
+    "advisor_output_tokens": 0,
+    "advisor_calls": 0,
+    "tool_calls": {},
+    "num_turns": 0,
+    "total_seconds": 2.0,
+    "cost_usd": 0.0,
+    "error": "Executor API error: Error code: 429 - {'error': {'code': '1308', 'message': '\u5df2\u8fbe\u5230 5 \u5c0f\u65f6\u7684\u4f7f\u7528\u4e0a\u9650\u3002\u60a8\u7684\u9650\u989d\u5c06\u5728 2026-05-21 20:02:37 \u91cd\u7f6e\u3002'}}"
+  }
+}
